@@ -6049,6 +6049,7 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
 
             uint32 absorb = 0;
             int32 resist = 0;
+            float StarshardsDamage;
             float fdamage;
             CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL, 0, 0);
 
@@ -6079,8 +6080,15 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
                 fdamage += (-1 + ((int)GetAuraTicks() - 1) / 4) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 2.0);
             // Starshards damage-per-tick calculation
             else if (spellProto->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_STARSHARDS>())
-                fdamage += (-1 + ((int)GetAuraTicks() - 1) / 2) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 3.0);
-
+			{
+				if (pCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->GetCastedTime() > 3500)
+					StarshardsDamage = 1;
+				else if (pCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->GetCastedTime() > 1500)
+					StarshardsDamage = 3;
+				else
+				    StarshardsDamage = 5;
+                fdamage += (-1 + (StarshardsDamage - 1) / 2) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 3.0);
+			}
             // SpellDamageBonus for magic spells
             if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
                 fdamage = target->SpellDamageBonusTaken(pCaster, spellProto, GetEffIndex(), fdamage, DOT, GetStackAmount());
