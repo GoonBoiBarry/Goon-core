@@ -2581,7 +2581,8 @@ void CombatBotBaseAI::EquipRandomGearInEmptySlots()
         }
 
         // Avoid low level items
-        if ((pProto->ItemLevel + sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE)) < me->GetLevel())
+        // Avoid low level items and higher level items (custom value change to raid you've completed)!!!!
+        if ((pProto->ItemLevel + sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE_DOWN)) < me->GetLevel() || pProto->ItemLevel - sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE_UP > me->GetLevel()))
             continue;
 
         if (me->CanUseItem(pProto, onlyPvE) != EQUIP_ERR_OK)
