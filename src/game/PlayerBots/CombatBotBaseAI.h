@@ -398,6 +398,7 @@ public:
             SpellEntry const* pShadowWordPain;
             SpellEntry const* pInnerFocus;
             SpellEntry const* pAbolishDisease;
+            SpellEntry const* pCureDisease;
             SpellEntry const* pDispelMagic;
             SpellEntry const* pManaBurn;
             SpellEntry const* pDevouringPlague;
