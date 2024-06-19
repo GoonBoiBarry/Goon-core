@@ -6091,7 +6091,7 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
             else if (spellProto->IsFitToFamily<SPELLFAMILY_WARLOCK, CF_WARLOCK_CURSE_OF_AGONY>())
                 fdamage += (-1 + ((int)GetAuraTicks() - 1) / 4) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 2.0);
             // Starshards damage-per-tick calculation
-            else if (spellProto->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_STARSHARDS>())
+            else if (spellProto->SpellIconID == 1485 && spellProto->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_STARSHARDS>())
 			{
 				if (pCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->GetCastedTime() > 3500)
 					StarshardsDamage = 1;
