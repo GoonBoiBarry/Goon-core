@@ -6062,6 +6062,7 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
             uint32 absorb = 0;
             int32 resist = 0;
             float StarshardsDamage;
+	    float StarfallDamage;
             float fdamage;
             CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL, 0, 0);
 
