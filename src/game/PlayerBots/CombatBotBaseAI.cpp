@@ -589,6 +589,26 @@ void CombatBotBaseAI::PopulateSpellData()
                     if (IsHigherRankSpell(m_spells.hunter.pAspectOfTheMonkey))
                         m_spells.hunter.pAspectOfTheMonkey = pSpellEntry;
                 }
+                else if (pSpellEntry->SpellName[0].find("Aspect of the Pack") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pAspectOfThePack))
+                        m_spells.hunter.pAspectOfThePack = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Trueshot Aura") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pTrueshotAura))
+                        m_spells.hunter.pTrueshotAura = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Rapid Fire") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pRapidFire))
+                        m_spells.hunter.pRapidFire = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Scatter Shot") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pScatterShot))
+                        m_spells.hunter.pScatterShot = pSpellEntry;
+                }
                 else if (pSpellEntry->SpellName[0].find("Serpent Sting") != std::string::npos)
                 {
                     if (IsHigherRankSpell(m_spells.hunter.pSerpentSting))
@@ -665,8 +685,8 @@ void CombatBotBaseAI::PopulateSpellData()
                 }
                 if (pSpellEntry->SpellName[0].find("Frost Armor") != std::string::npos)
                 {
-                    if (IsHigherRankSpell(pFrostArmor))
-                        pFrostArmor = pSpellEntry;
+                    if (IsHigherRankSpell(m_spells.mage.pFrostArmor))
+                        m_spells.mage.pFrostArmor = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Ice Barrier") != std::string::npos)
                 {
@@ -725,8 +745,8 @@ void CombatBotBaseAI::PopulateSpellData()
                 }
                 else if (pSpellEntry->SpellName[0] == "Polymorph") // Sheep
                 {
-                    if (IsHigherRankSpell(pPolymorphSheep))
-                        pPolymorphSheep = pSpellEntry;
+                    if (IsHigherRankSpell(m_spells.mage.pPolymorphSheep))
+                        m_spells.mage.pPolymorphSheep = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Polymorph: Cow") != std::string::npos)
                 {
@@ -2781,7 +2801,7 @@ bool CombatBotBaseAI::CanTryToCastSpell(Unit const* pTarget, SpellEntry const* p
     if (pSpellEntry->GetErrorAtShapeshiftedCast(me->GetShapeshiftForm()) != SPELL_CAST_OK)
         return false;
 
-    if (pSpellEntry->IsSpellAppliesAura() && pTarget->HasAura(pSpellEntry->Id))
+    if (pSpellEntry->IsSpellAppliesAura() && pTarget->HasAura(pSpellEntry->Id) && pSpellEntry != m_spells.mage.pFrostbolt && pSpellEntry != m_spells.warrior.pSunderArmor)
         return false;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellEntry->rangeIndex);
