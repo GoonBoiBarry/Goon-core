@@ -685,8 +685,8 @@ void CombatBotBaseAI::PopulateSpellData()
                 }
                 if (pSpellEntry->SpellName[0].find("Frost Armor") != std::string::npos)
                 {
-                    if (IsHigherRankSpell(m_spells.mage.pFrostArmor))
-                        m_spells.mage.pFrostArmor = pSpellEntry;
+                    if (IsHigherRankSpell(pFrostArmor))
+                        pFrostArmor = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Ice Barrier") != std::string::npos)
                 {
@@ -745,8 +745,8 @@ void CombatBotBaseAI::PopulateSpellData()
                 }
                 else if (pSpellEntry->SpellName[0] == "Polymorph") // Sheep
                 {
-                    if (IsHigherRankSpell(m_spells.mage.pPolymorphSheep))
-                        m_spells.mage.pPolymorphSheep = pSpellEntry;
+                    if (IsHigherRankSpell(pPolymorphSheep))
+                        pPolymorphSheep = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Polymorph: Cow") != std::string::npos)
                 {
@@ -896,6 +896,11 @@ void CombatBotBaseAI::PopulateSpellData()
                 {
                     if (IsHigherRankSpell(m_spells.priest.pAbolishDisease))
                         m_spells.priest.pAbolishDisease = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Cure Disease") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.priest.pCureDisease))
+                        m_spells.priest.pCureDisease = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Dispel Magic") != std::string::npos)
                 {
