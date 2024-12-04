@@ -520,7 +520,7 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recvData)
         {
             // Can only change flags and speed for not current active mover.
             pMover->m_movementInfo.moveFlags = movementInfo.moveFlags;
-            pMover->m_movementInfo.CorrectData(pMover);
+            pMover->m_movementInfo.CorrectData();
         }
     }
 
@@ -629,7 +629,7 @@ void WorldSession::HandleMovementFlagChangeToggleAck(WorldPacket& recvData)
         {
             // Can only change flags and speed for not current active mover.
             pMover->m_movementInfo.moveFlags = movementInfo.moveFlags;
-            pMover->m_movementInfo.CorrectData(pMover);
+            pMover->m_movementInfo.CorrectData();
         }
     } while (false);
 
@@ -730,7 +730,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
         {
             // Can only change flags and speed for not current active mover.
             pMover->m_movementInfo.moveFlags = movementInfo.moveFlags;
-            pMover->m_movementInfo.CorrectData(pMover);
+            pMover->m_movementInfo.CorrectData();
         }
     } while (false);
 
@@ -865,9 +865,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
             return;
 
         if (m_moveRejectTime = _player->GetCheatData()->HandleFlagTests(pPlayerMover, movementInfo, CMSG_MOVE_SPLINE_DONE))
-        {
             return;
-        }
     }
 
     HandleMoverRelocation(pMover, movementInfo);
@@ -1073,6 +1071,13 @@ Unit* WorldSession::GetMoverFromGuid(ObjectGuid const& guid) const
     return nullptr;
 }
 
+void WorldSession::RejectMovementPacketsFor(uint32 ms)
+{
+    uint32 timeout = WorldTimer::getMSTime() + ms;
+    if (m_moveRejectTime < timeout)
+        m_moveRejectTime = timeout;
+}
+
 bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo) const
 {
     if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos().x, movementInfo.GetPos().y, movementInfo.GetPos().z, movementInfo.GetPos().o))
@@ -1097,7 +1102,8 @@ void WorldSession::HandleMoverRelocation(Unit* pMover, MovementInfo& movementInf
 {
     Player* const pPlayerMover = pMover->ToPlayer();
 
-    movementInfo.CorrectData(pMover);
+    movementInfo.sourceSessionGuid = GetGUID();
+    movementInfo.CorrectData();
 
     // Prevent client from removing root flag.
     if (pMover->HasUnitMovementFlag(MOVEFLAG_ROOT) && !movementInfo.HasMovementFlag(MOVEFLAG_ROOT))

@@ -127,7 +127,7 @@ struct SpellModifier
 
     SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, Aura* aura, int16 _charges = 0);
 
-    bool isAffectedOnSpell(SpellEntry const* spell) const;
+    bool IsAffectedOnSpell(SpellEntry const* spell) const;
 
     SpellModOp   op   : 8;
     SpellModType type : 8;
@@ -738,8 +738,9 @@ enum ReputationSource
 };
 
 // Player summoning auto-decline time (in secs)
-#define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
-#define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
+#define MAX_PLAYER_SUMMON_DELAY (2*MINUTE)
+#define MAX_MONEY_AMOUNT (0x7FFFFFFF-1)
+#define MAX_TRIAL_MONEY_AMOUNT 100000
 
 struct InstancePlayerBind
 {
@@ -1111,6 +1112,7 @@ class Player final: public Unit
         static uint32 GetAttackBySlot(uint8 slot);        // MAX_ATTACK if not weapon slot
         uint32 GetHighestKnownArmorProficiency() const;
         std::vector<Item*>& GetItemUpdateQueue() { return m_itemUpdateQueue; }
+        static bool IsMainHandPos(uint16 pos) { return uint8(pos >> 8) == INVENTORY_SLOT_BAG_0 && uint8(pos & 255) == EQUIPMENT_SLOT_MAINHAND; }
         static bool IsInventoryPos(uint16 pos) { return IsInventoryPos(pos >> 8, pos & 255); }
         static bool IsInventoryPos(uint8 bag, uint8 slot);
         static bool IsEquipmentPos(uint16 pos) { return IsEquipmentPos(pos >> 8, pos & 255); }
@@ -1221,12 +1223,13 @@ class Player final: public Unit
 
         uint32 GetMoney() const { return GetUInt32Value(PLAYER_FIELD_COINAGE); }
         void LogModifyMoney(int32 d, char const* type, ObjectGuid fromGuid = ObjectGuid(), uint32 data = 0);
+        uint32 GetMaxMoney() const;
         void ModifyMoney(int32 d)
         {
             if (d < 0)
                 SetMoney(GetMoney() > uint32(-d) ? GetMoney() + d : 0);
             else
-                SetMoney(GetMoney() < uint32(MAX_MONEY_AMOUNT - d) ? GetMoney() + d : MAX_MONEY_AMOUNT);
+                SetMoney((uint32)std::min<uint64>(uint64(GetMoney()) + uint64(d), GetMaxMoney()));
         }
         void LootMoney(int32 g, Loot* loot);
         std::string GetShortDescription() const; // "player:guid [username:accountId@IP]"

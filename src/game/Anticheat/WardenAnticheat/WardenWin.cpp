@@ -32,8 +32,8 @@
 #include "Unit.h"
 #include "Chat.h"
 #include "WorldSession.h"
-#include "Auth/BigNumber.h"
-#include "Auth/HMACSHA1.h"
+#include "Crypto/BigNumber.h"
+#include "Crypto/Hash/HMACSHA1.h"
 #include "ByteBuffer.h"
 #include "Database/DatabaseEnv.h"
 #include "Player.h"
@@ -84,6 +84,17 @@ static constexpr struct ClientOffsets
     // Click to move
     uint32 ClickToMovePosition;
 } Offsets[] = {
+    {
+        5302,
+        0x2F5CE0,
+        0x22D230, 0x22E2F0, 0x22DF60, 0x2393F0,
+        0x226A0,
+        0xC213E4,
+        0xC9470C,
+        0xBB4E98, 0x38A0, 0x0, 0xA8,
+        0xC8E64C, 0x228, 0x08,
+        0xBF3A94
+    },
     {
         5464,
         0x2FAE20,
@@ -733,11 +744,11 @@ void WardenWin::LoadScriptedScans()
 
             scan << opcode << seed;
 
-            HMACSHA1 hash(reinterpret_cast<uint8 const*>(&seed), sizeof(seed));
+            Crypto::Hash::HMACSHA1::Generator hash(reinterpret_cast<uint8 const*>(&seed), sizeof(seed));
             hash.UpdateData(hypervisor.DeviceName);
-            hash.Finalize();
+            auto digest = hash.GetDigest();
 
-            scan.append(hash.GetDigest(), hash.GetLength());
+            scan.append(digest.data(), digest.size());
             scan << static_cast<uint8>(strings.size());
         }
     },
@@ -762,7 +773,7 @@ void WardenWin::LoadScriptedScans()
         return false;
     },
     // TODO: Replace the magic number below with combined driver string lengths
-    (sizeof(uint8) + sizeof(uint32) + SHA_DIGEST_LENGTH + sizeof(uint8)) * HypervisorCount + 21,
+    (sizeof(uint8) + sizeof(uint32) + Crypto::Hash::SHA1::Digest::size() + sizeof(uint8)) * HypervisorCount + 21,
     sizeof(uint8) * HypervisorCount,
     "Hypervisor check",
     ScanFlags::InitialLogin, 0, UINT16_MAX));
@@ -787,11 +798,11 @@ void WardenWin::LoadScriptedScans()
 
         static_assert(sizeof(pattern) <= 0xFF, "pattern length must fit into 8 bits");
 
-        HMACSHA1 hash(reinterpret_cast<uint8 const*>(&seed), sizeof(seed));
+        Crypto::Hash::HMACSHA1::Generator hash(reinterpret_cast<uint8 const*>(&seed), sizeof(seed));
         hash.UpdateData(&pattern[0], sizeof(pattern));
-        hash.Finalize();
+        auto digest = hash.GetDigest();
 
-        scan.append(hash.GetDigest(), hash.GetLength());
+        scan.append(digest.data(), digest.size());
 
         scan << warden->GetModule()->memoryRead << static_cast<uint8>(sizeof(pattern));
     },
@@ -802,7 +813,7 @@ void WardenWin::LoadScriptedScans()
 
         // if this is not found, it means someone has tampered with the function
         return !found;
-    }, sizeof(uint8) + sizeof(uint32) + SHA_DIGEST_LENGTH + sizeof(uint32) + sizeof(uint8), sizeof(uint8),
+    }, sizeof(uint8) + sizeof(uint32) + Crypto::Hash::SHA1::Digest::size() + sizeof(uint32) + sizeof(uint8), sizeof(uint8),
     "Warden Memory Read check",
     ScanFlags::None, 0, UINT16_MAX));
 

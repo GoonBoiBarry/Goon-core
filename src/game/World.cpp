@@ -81,7 +81,7 @@
 #include "InstanceStatistics.h"
 #include "GuardMgr.h"
 #include "TransportMgr.h"
-
+#include "RealmZone.h"
 #include <chrono>
 
 INSTANTIATE_SINGLETON_1(World);
@@ -320,7 +320,8 @@ void World::AddSession_(WorldSession* s)
     WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4);
     packet << uint8(AUTH_OK);
     packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(0);                                     // BillingPlanFlags
+                                                            // BillingPlanFlags
+    packet << uint8(s->HasTrialRestrictions() ? (BILLING_FLAG_TRIAL | BILLING_FLAG_RESTRICTED) : BILLING_FLAG_NONE); 
     packet << uint32(0);                                    // BillingTimeRested
     s->SendPacket(&packet);
 
@@ -366,7 +367,8 @@ void World::AddQueuedSession(WorldSession* sess)
     WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 4);
     packet << uint8(AUTH_WAIT_QUEUE);
     packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(0);                                     // BillingPlanFlags
+                                                            // BillingPlanFlags
+    packet << uint8(sess->HasTrialRestrictions() ? (BILLING_FLAG_TRIAL | BILLING_FLAG_RESTRICTED) : BILLING_FLAG_NONE); 
     packet << uint32(0);                                    // BillingTimeRested
     packet << uint32(GetQueuedSessionPos(sess));            // position in queue
     sess->SendPacket(&packet);
@@ -540,6 +542,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE, "TargetPosRecalculateRange", 1.5f, CONTACT_DISTANCE, ATTACK_DISTANCE);
 
+    setConfig(CONFIG_BOOL_DURABILITY_LOSS_ENABLE, "DurabilityLoss.Enable", true);
     setConfigPos(CONFIG_FLOAT_RATE_DURABILITY_LOSS_DAMAGE, "DurabilityLossChance.Damage", 0.5f);
 
     setConfigPos(CONFIG_FLOAT_LISTEN_RANGE_SAY,       "ListenRange.Say",       25.0f);
@@ -617,6 +620,7 @@ void World::LoadConfigSettings(bool reload)
     setConfigMinMax(CONFIG_UINT32_CHARACTERS_PER_REALM, "CharactersPerRealm", 10, 1, 10);
     setConfigMin(CONFIG_UINT32_CHARACTERS_PER_ACCOUNT, "CharactersPerAccount", 50, getConfig(CONFIG_UINT32_CHARACTERS_PER_REALM));
     setConfig(CONFIG_BOOL_LIMIT_PLAY_TIME, "LimitPlayTime", false);
+    setConfig(CONFIG_BOOL_RESTRICT_UNVERIFIED_ACCOUNTS, "RestrictUnverifiedAccounts", false);
 
     setConfig(CONFIG_BOOL_SKIP_CINEMATICS, "SkipCinematics", false);
     setConfig(CONFIG_BOOL_OBJECT_HEALTH_VALUE_SHOW, "ShowHealthValues", false);
@@ -1092,7 +1096,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_UNLINKED_AUCTION_HOUSES, "Progression.UnlinkedAuctionHouses", true);
 
     // Movement Anticheat
-    setConfig(CONFIG_BOOL_AC_MOVEMENT_ENABLED, "Anticheat.Enable", true);
+    setConfig(CONFIG_BOOL_AC_MOVEMENT_ENABLED, "Anticheat.Enable", false);
     setConfig(CONFIG_BOOL_AC_MOVEMENT_PLAYERS_ONLY, "Anticheat.PlayersOnly", true);
     setConfig(CONFIG_BOOL_AC_MOVEMENT_NOTIFY_CHEATERS, "Anticheat.NotifyCheaters", false);
     setConfig(CONFIG_UINT32_AC_MOVEMENT_BAN_DURATION, "Anticheat.BanDuration", 86400);
@@ -1219,8 +1223,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_AC_MOVEMENT_CHEAT_BOTTING_PENALTY, "Anticheat.Botting.Penalty", CHEAT_ACTION_LOG | CHEAT_ACTION_REPORT_GMS);
 
     // Warden Anticheat
-    setConfig(CONFIG_BOOL_AC_WARDEN_WIN_ENABLED, "Warden.WinEnabled", true);
-    setConfig(CONFIG_BOOL_AC_WARDEN_OSX_ENABLED, "Warden.OSXEnabled", true);
+    setConfig(CONFIG_BOOL_AC_WARDEN_WIN_ENABLED, "Warden.WinEnabled", false);
+    setConfig(CONFIG_BOOL_AC_WARDEN_OSX_ENABLED, "Warden.OSXEnabled", false);
     setConfig(CONFIG_BOOL_AC_WARDEN_PLAYERS_ONLY, "Warden.PlayersOnly", false);
     setConfig(CONFIG_UINT32_AC_WARDEN_NUM_SCANS, "Warden.NumScans", 10);
     setConfig(CONFIG_UINT32_AC_WARDEN_CLIENT_RESPONSE_DELAY, "Warden.ClientResponseDelay", 30);
@@ -1347,6 +1351,9 @@ void World::SetInitialWorldSettings()
     // Remove the bones (they should not exist in DB though) and old corpses after a restart
     CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `corpse_type` = '0' OR `time` < (UNIX_TIMESTAMP()-'%u')", 3 * DAY);
 
+    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading Script Names...");
+    sScriptMgr.LoadScriptNames();
+
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading spells ...");
     sSpellMgr.LoadSpells();
 
@@ -1385,9 +1392,6 @@ void World::SetInitialWorldSettings()
     LoadDBCStores(dbcPath);
     DetectDBCLang();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
-
-    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading Script Names...");
-    sScriptMgr.LoadScriptNames();
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading MapTemplate...");
     sObjectMgr.LoadMapTemplate();
@@ -1595,9 +1599,6 @@ void World::SetInitialWorldSettings()
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading spell target destination coordinates...");
     sSpellMgr.LoadSpellTargetPositions();
-
-    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading SpellAffect definitions...");
-    sSpellMgr.LoadSpellAffects();
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading spell pet auras...");
     sSpellMgr.LoadSpellPetAuras();
@@ -1941,12 +1942,16 @@ void World::DetectDBCLang()
 // Only processes packets while session update, the messager, and cli commands processing are NOT running
 void World::ProcessAsyncPackets()
 {
-    while (!sWorld.IsStopped())
+    do
     {
-        do
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        } while (!m_canProcessAsyncPackets);
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::lock_guard<std::mutex> lock(m_asyncPacketsMutex);
+
+        if (IsStopped())
+            return;
+
+        if (!m_canProcessAsyncPackets)
+            continue;
 
         for (auto const& itr : m_sessions)
         {
@@ -1959,7 +1964,7 @@ void World::ProcessAsyncPackets()
             if (!m_canProcessAsyncPackets)
                 break;
         }
-    }
+    } while (!IsStopped());
 }
 
 // Update the World !
@@ -1994,18 +1999,21 @@ void World::Update(uint32 diff)
         sAuctionMgr.Update();
     }
 
-    m_canProcessAsyncPackets = false;
+    {
+        m_canProcessAsyncPackets = false;
+        std::lock_guard<std::mutex> lock(m_asyncPacketsMutex);
 
-    GetMessager().Execute(this);
+        GetMessager().Execute(this);
 
-    // <li> Handle session updates
-    uint32 updateSessionsTime = WorldTimer::getMSTime();
-    UpdateSessions(diff);
-    updateSessionsTime = WorldTimer::getMSTimeDiffToNow(updateSessionsTime);
-    if (getConfig(CONFIG_UINT32_PERFLOG_SLOW_SESSIONS_UPDATE) && updateSessionsTime > getConfig(CONFIG_UINT32_PERFLOG_SLOW_SESSIONS_UPDATE))
-        sLog.Out(LOG_PERFORMANCE, LOG_LVL_MINIMAL, "Update sessions: %ums", updateSessionsTime);
+        // <li> Handle session updates
+        uint32 updateSessionsTime = WorldTimer::getMSTime();
+        UpdateSessions(diff);
+        updateSessionsTime = WorldTimer::getMSTimeDiffToNow(updateSessionsTime);
+        if (getConfig(CONFIG_UINT32_PERFLOG_SLOW_SESSIONS_UPDATE) && updateSessionsTime > getConfig(CONFIG_UINT32_PERFLOG_SLOW_SESSIONS_UPDATE))
+            sLog.Out(LOG_PERFORMANCE, LOG_LVL_MINIMAL, "Update sessions: %ums", updateSessionsTime);
 
-    m_canProcessAsyncPackets = true;
+        m_canProcessAsyncPackets = true;
+    }
 
     // <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
@@ -2061,7 +2069,7 @@ void World::Update(uint32 diff)
     if (getConfig(CONFIG_UINT32_PERFLOG_SLOW_MAPSYSTEM_UPDATE) && updateMapSystemTime > getConfig(CONFIG_UINT32_PERFLOG_SLOW_MAPSYSTEM_UPDATE))
         sLog.Out(LOG_PERFORMANCE, LOG_LVL_MINIMAL, "Update map system: %ums [%ums for async]", updateMapSystemTime, WorldTimer::getMSTimeDiffToNow(asyncWaitBegin));
 
-    // Sauvegarde des variables internes (table variables) : MaJ par rapport a la DB
+    // Save internal variables (table variables) : DB update
     if (m_timers[WUPDATE_SAVE_VAR].Passed())
     {
         m_timers[WUPDATE_SAVE_VAR].Reset();
@@ -2115,12 +2123,15 @@ void World::Update(uint32 diff)
     // Update ban list if necessary
     sAccountMgr.Update(diff);
 
-    m_canProcessAsyncPackets = false;
+    {
+        m_canProcessAsyncPackets = false;
+        std::lock_guard<std::mutex> lock(m_asyncPacketsMutex);
 
-    // And last, but not least handle the issued cli commands
-    ProcessCliCommands();
+        // And last, but not least handle the issued cli commands
+        ProcessCliCommands();
 
-    m_canProcessAsyncPackets = true;
+        m_canProcessAsyncPackets = true;
+    }
 
     //cleanup unused GridMap objects as well as VMaps
     if (getConfig(CONFIG_BOOL_CLEANUP_TERRAIN))

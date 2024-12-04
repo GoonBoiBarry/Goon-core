@@ -37,8 +37,6 @@
 
 #include <memory>
 
-#define MAX_SPELL_ID 40000
-
 class WorldSession;
 class WorldPacket;
 class DynamicObj;
@@ -489,15 +487,16 @@ class Spell
         bool IsChannelingVisual() const { return m_isChannelingVisual; }
 
         int32 GetAbsorbedDamage() const { return m_absorbed; }
+
+        SpellCaster* const m_caster = nullptr;
+        Unit* const m_casterUnit = nullptr;
+        GameObject* const m_casterGo = nullptr;
+
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
         void UpdateCastStartPosition();
-
-        SpellCaster* const m_caster = nullptr;
-        Unit* const m_casterUnit = nullptr;
-        GameObject* const m_casterGo = nullptr;
 
         ObjectGuid m_originalCasterGUID;                    // real source of cast (aura caster/etc), used for spell targets selection
                                                             // e.g. damage around area spell trigered by victim aura and damage enemies of aura caster
@@ -548,9 +547,15 @@ class Spell
         Corpse* corpseTarget = nullptr;
         GameObject* gameObjTarget = nullptr;
         SpellAuraHolder* m_spellAuraHolder = nullptr;       // spell aura holder for current target, created only if spell has aura applying effect
-        float damage = 0;
         bool isReflected = false;
+    public:
+        Unit* GetUnitTarget() const { return unitTarget; }
+        Item* GetItemTarget() const { return itemTarget; }
+        Corpse* GetCorpseTarget() const { return corpseTarget; }
+        GameObject* GetGOTarget() const { return gameObjTarget; }
+        float damage = 0;
 
+    protected:
         // this is set in Spell Hit, but used in Apply Aura handler
         DiminishingLevels m_diminishLevel;
         DiminishingGroup m_diminishGroup;
@@ -576,6 +581,7 @@ class Spell
         // Spell target subsystem
         //*****************************************
         // Targets store structures and data
+    public:
         struct TargetInfo
         {
             ObjectGuid targetGUID;
@@ -589,7 +595,6 @@ class Spell
             bool   isCrit:1;
             bool   deleted:1;
         };
-        uint8 m_needAliveTargetMask = 0;                    // Mask req. alive targets
 
         struct GOTargetInfo
         {
@@ -606,9 +611,6 @@ class Spell
             uint8 effectMask;
             bool   deleted:1;
         };
-        bool m_destroyed = false;
-
-        SpellCastResult CheckScriptTargeting(SpellEffectIndex effIndex, uint32 chainTargets, float radius, uint32 targetMode, UnitList& tempUnitList);
 
 #ifndef USE_STANDARD_MALLOC
         typedef tbb::concurrent_vector<TargetInfo>     TargetList;
@@ -623,6 +625,11 @@ class Spell
         TargetList     m_UniqueTargetInfo;
         GOTargetList   m_UniqueGOTargetInfo;
         ItemTargetList m_UniqueItemInfo;
+
+    protected:
+        uint8 m_needAliveTargetMask = 0; // Mask req. alive targets
+        bool m_destroyed = false;
+        SpellCastResult CheckScriptTargeting(SpellEffectIndex effIndex, uint32 chainTargets, float radius, uint32 targetMode, UnitList& tempUnitList);
 
         void AddUnitTarget(Unit* target, SpellEffectIndex effIndex);
         void CheckAtDelay(TargetInfo* pInf);
@@ -645,6 +652,9 @@ class Spell
         //List For Triggered Spells
         std::vector<SpellEntry const*> m_TriggerSpells;                      // casted by caster to same targets settings in m_targets at success finish of current spell
         std::vector<SpellEntry const*> m_preCastSpells;                      // casted by caster to each target at spell hit before spell effects apply
+
+        // Scripting System
+        SpellScript* m_spellScript = nullptr;
 
         uint32 m_spellState = SPELL_STATE_NULL;
         uint32 m_timer = 0;

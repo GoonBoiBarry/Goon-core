@@ -103,7 +103,7 @@ void MovementInfo::Read(ByteBuffer &data)
     }
 }
 
-void MovementInfo::CorrectData(Unit* mover)
+void MovementInfo::CorrectData()
 {
     // Nostalrius: remove incompatible flags, causing client freezes for example
 #define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
@@ -3459,13 +3459,6 @@ void WorldObject::Update(uint32 update_diff, uint32 /*time_diff*/)
 
     ExecuteDelayedActions();
 }
-
-class NULLNotifier
-{
-public:
-    template<class T> void Visit(GridRefManager<T>& m) {}
-    void Visit(CameraMapType&) {}
-};
 
 void WorldObject::LoadMapCellsAround(float dist) const
 {

@@ -412,7 +412,7 @@ SpellModifier::SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, A
     mask = sSpellMgr.GetSpellAffectMask(aura->GetId(), aura->GetEffIndex());
 }
 
-bool SpellModifier::isAffectedOnSpell(SpellEntry const* spell) const
+bool SpellModifier::IsAffectedOnSpell(SpellEntry const* spell) const
 {
     SpellEntry const* affect_spell = sSpellMgr.GetSpellEntry(spellId);
     // False if affect_spell == nullptr or spellFamily not equal
@@ -1853,7 +1853,7 @@ void Player::SetWorldMask(uint32 newMask)
 void Player::UpdateCinematic(uint32 diff)
 {
     m_cinematicElapsedTime += diff;
-    // On check une nouvelle position toutes les secondes.
+    // We check a new position every second.
     if ((m_cinematicLastCheck + 1000) > m_cinematicElapsedTime)
         return;
 
@@ -1867,13 +1867,13 @@ void Player::UpdateCinematic(uint32 diff)
 
     float x_diff = (m_cinematicStartPos.x - tpPosition->x);
     float y_diff = (m_cinematicStartPos.y - tpPosition->y);
-    // Re-tp a la position de fin de la cinematique
+    // Re-teleport to end of cinematic's position
     if ((x_diff * x_diff) <= 20 || (y_diff * y_diff) <= 20)
     {
         GetCamera().ResetView();
         return;
     }
-    // Sinon on place un petit waypoint sur lequel on met notre camera, pour voir les mobs alentour
+    // Otherwise we place a small waypoint on which we put our camera, to see the surrounding mobs.
     if (Creature* viewPoint = SummonCreature(1, tpPosition->x, tpPosition->y, tpPosition->z - 20, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 5000, true))
         GetCamera().SetView(viewPoint);
 }
@@ -1889,7 +1889,7 @@ void Player::CinematicStart(uint32 id)
     m_cinematicElapsedTime = 0;
     m_currentCinematicEntry = id;
 
-    // Pour teleporter a la premiere position de la cinematique
+    // Teleport to the first position of the cinematic
     UpdateCinematic(1);
 }
 
@@ -3216,6 +3216,7 @@ void Player::SetCheatFixedZ(bool on, bool notify)
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_FIXED_Z);
 
+    GetSession()->RejectMovementPacketsFor(100);
     SendHeartBeat(true);
 
     if (notify)
@@ -3359,6 +3360,9 @@ void Player::SetCheatDebugTargetInfo(bool on, bool notify)
 
 bool Player::IsAllowedWhisperFrom(ObjectGuid guid) const
 {
+    if (GetObjectGuid() == guid)
+        return true;
+
     if (PlayerSocial const* social = GetSocial())
         if (social->HasFriend(guid))
             return true;
@@ -3468,6 +3472,9 @@ void Player::GiveXP(uint32 xp, Unit const* victim)
         xp /= 2;
 #endif
 
+    if (GetPersonalXpRate() >= 0.0f)
+        xp *= GetPersonalXpRate();
+
     if (xp < 1)
         return;
 
@@ -3478,6 +3485,9 @@ void Player::GiveXP(uint32 xp, Unit const* victim)
 
     // XP to money conversion processed in Player::RewardQuest
     if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+        return;
+
+    if (level >= TRIAL_MAX_LEVEL && GetSession()->HasTrialRestrictions())
         return;
 
     // XP resting bonus for kill
@@ -3767,12 +3777,14 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0.0f);
 
     SetInt32Value(UNIT_FIELD_ATTACK_POWER,            0);
-    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0);
+    SetInt16Value(UNIT_FIELD_ATTACK_POWER_MODS, 0, 0);
+    SetInt16Value(UNIT_FIELD_ATTACK_POWER_MODS, 1, 0);
 #if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_8_4
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 0.0f);
 #endif
     SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0);
-    SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS, 0);
+    SetInt16Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS, 0, 0);
+    SetInt16Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS, 1, 0);
 #if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_8_4
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 0.0f);
 #endif
@@ -5020,6 +5032,7 @@ void Player::SetFly(bool enable)
         m_movementInfo.moveFlags = (MOVEFLAG_NONE);
     }
 
+    GetSession()->RejectMovementPacketsFor(100);
     SendHeartBeat(true);
 }
 
@@ -5316,6 +5329,9 @@ void Player::DurabilityPointsLossAll(int32 points, bool inventory)
 
 void Player::DurabilityPointsLoss(Item* item, int32 points)
 {
+    if (!sWorld.getConfig(CONFIG_BOOL_DURABILITY_LOSS_ENABLE))
+        return;
+
     int32 pMaxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
     int32 pOldDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
     int32 pNewDurability = pOldDurability - points;
@@ -5754,12 +5770,12 @@ void Player::SetRegularAttackTime(bool resetTimer)
 }
 
 //skill+step, checking for max value
-bool Player::UpdateSkill(uint32 skill_id, uint32 step)
+bool Player::UpdateSkill(uint32 skillId, uint32 step)
 {
-    if (!skill_id)
+    if (!skillId)
         return false;
 
-    SkillStatusMap::iterator itr = mSkillStatus.find(skill_id);
+    SkillStatusMap::iterator itr = mSkillStatus.find(skillId);
     if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
         return false;
 
@@ -5783,13 +5799,13 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
     return true;
 }
 
-inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLevel, uint32 YellowLevel)
+inline int SkillGainChance(uint32 skillValue, uint32 grayLevel, uint32 greenLevel, uint32 yellowLevel)
 {
-    if (SkillValue >= GrayLevel)
+    if (skillValue >= grayLevel)
         return sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_GREY) * 10;
-    if (SkillValue >= GreenLevel)
+    if (skillValue >= greenLevel)
         return sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_GREEN) * 10;
-    if (SkillValue >= YellowLevel)
+    if (skillValue >= yellowLevel)
         return sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_YELLOW) * 10;
     return sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_ORANGE) * 10;
 }
@@ -5804,42 +5820,61 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     {
         if (_spell_idx->second->skillId)
         {
-            uint32 SkillValue = GetSkillValuePure(_spell_idx->second->skillId);
+            uint32 skillValue = GetSkillValuePure(_spell_idx->second->skillId);
+            uint32 craftSkillGain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
 
-            uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
+            if (GetSession()->HasTrialRestrictions())
+            {
+                if (SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(_spell_idx->second->skillId))
+                {
+                    if (skillInfo->categoryId == SKILL_CATEGORY_PROFESSION && skillValue >= MAX_TRIAL_MAIN_PROFESSION_SKILL ||
+                        skillInfo->categoryId == SKILL_CATEGORY_SECONDARY && skillValue >= MAX_TRIAL_SECONDARY_PROFESSION_SKILL)
+                        return false;
+                }
+            }
 
-            return UpdateSkillPro(_spell_idx->second->skillId, SkillGainChance(SkillValue,
+            return UpdateSkillPro(_spell_idx->second->skillId, SkillGainChance(skillValue,
                                   _spell_idx->second->max_value,
                                   (_spell_idx->second->max_value + _spell_idx->second->min_value) / 2,
                                   _spell_idx->second->min_value),
-                                  craft_skill_gain);
+                                  craftSkillGain);
         }
     }
     return false;
 }
 
-bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator)
+bool Player::UpdateGatherSkill(uint32 skillId, uint32 skillValue, uint32 redLevel, uint32 multiplicator)
 {
-    sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", SkillId, SkillValue, RedLevel);
+    sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", skillId, skillValue, redLevel);
 
-    uint32 gathering_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_GATHERING);
+    if (GetSession()->HasTrialRestrictions())
+    {
+        if (SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(skillId))
+        {
+            if (skillInfo->categoryId == SKILL_CATEGORY_PROFESSION && skillValue >= MAX_TRIAL_MAIN_PROFESSION_SKILL ||
+                skillInfo->categoryId == SKILL_CATEGORY_SECONDARY && skillValue >= MAX_TRIAL_SECONDARY_PROFESSION_SKILL)
+                return false;
+        }
+    }
+
+    uint32 gatheringSkillGain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_GATHERING);
 
     // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
-    switch (SkillId)
+    switch (skillId)
     {
         case SKILL_HERBALISM:
         case SKILL_LOCKPICKING:
-            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
+            return UpdateSkillPro(skillId, SkillGainChance(skillValue, redLevel + 100, redLevel + 50, redLevel + 25) * multiplicator, gatheringSkillGain);
         case SKILL_SKINNING:
             if (sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS) == 0)
-                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
+                return UpdateSkillPro(skillId, SkillGainChance(skillValue, redLevel + 100, redLevel + 50, redLevel + 25) * multiplicator, gatheringSkillGain);
             else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
+                return UpdateSkillPro(skillId, (SkillGainChance(skillValue, redLevel + 100, redLevel + 50, redLevel + 25) * multiplicator) >> (skillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS)), gatheringSkillGain);
         case SKILL_MINING:
             if (sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS) == 0)
-                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
+                return UpdateSkillPro(skillId, SkillGainChance(skillValue, redLevel + 100, redLevel + 50, redLevel + 25) * multiplicator, gatheringSkillGain);
             else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
+                return UpdateSkillPro(skillId, (SkillGainChance(skillValue, redLevel + 100, redLevel + 50, redLevel + 25) * multiplicator) >> (skillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS)), gatheringSkillGain);
     }
     return false;
 }
@@ -5848,56 +5883,57 @@ bool Player::UpdateFishingSkill()
 {
     sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "UpdateFishingSkill");
 
-    uint32 SkillValue = GetSkillValuePure(SKILL_FISHING);
+    uint32 skillValue = GetSkillValuePure(SKILL_FISHING);
 
-    int32 chance = SkillValue < 75 ? 100 : 2500 / (SkillValue - 50);
-
-    uint32 gathering_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_GATHERING);
-
-    return UpdateSkillPro(SKILL_FISHING, chance * 10, gathering_skill_gain);
-}
-
-bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
-{
-    sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance / 10.0);
-    if (!SkillId)
+    if (GetSession()->HasTrialRestrictions() && skillValue >= MAX_TRIAL_SECONDARY_PROFESSION_SKILL)
         return false;
 
-    if (Chance <= 0)                                        // speedup in 0 chance case
+    int32 chance = skillValue < 75 ? 100 : 2500 / (skillValue - 50);
+    uint32 gatheringSkillGain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_GATHERING);
+
+    return UpdateSkillPro(SKILL_FISHING, chance * 10, gatheringSkillGain);
+}
+
+bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
+{
+    sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "UpdateSkillPro(SkillId %d, Chance %3.1f%%)", skillId, chance / 10.0);
+    if (!skillId)
+        return false;
+
+    if (chance <= 0)                                        // speedup in 0 chance case
     {
-        sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "Player::UpdateSkillPro Chance=%3.1f%% missed", Chance / 10.0);
+        sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "Player::UpdateSkillPro Chance=%3.1f%% missed", chance / 10.0);
         return false;
     }
 
-    SkillStatusMap::iterator itr = mSkillStatus.find(SkillId);
+    SkillStatusMap::iterator itr = mSkillStatus.find(skillId);
     if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
         return false;
 
     uint32 valueIndex = PLAYER_SKILL_VALUE_INDEX(itr->second.pos);
-
     uint32 data = GetUInt32Value(valueIndex);
-    uint16 SkillValue = SKILL_VALUE(data);
-    uint16 MaxValue   = SKILL_MAX(data);
+    uint16 skillValue = SKILL_VALUE(data);
+    uint16 maxValue   = SKILL_MAX(data);
 
-    if (!MaxValue || !SkillValue || SkillValue >= MaxValue)
+    if (!maxValue || !skillValue || skillValue >= maxValue)
         return false;
 
     int32 Roll = irand(1, 1000);
 
-    if (Roll <= Chance)
+    if (Roll <= chance)
     {
-        uint32 new_value = SkillValue + step;
-        if (new_value > MaxValue)
-            new_value = MaxValue;
+        uint32 new_value = skillValue + step;
+        if (new_value > maxValue)
+            new_value = maxValue;
 
-        SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, MaxValue));
+        SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, maxValue));
         if (itr->second.uState != SKILL_NEW)
             itr->second.uState = SKILL_CHANGED;
-        sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "Player::UpdateSkillPro Chance=%3.1f%% taken", Chance / 10.0);
+        sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "Player::UpdateSkillPro Chance=%3.1f%% taken", chance / 10.0);
         return true;
     }
 
-    sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "Player::UpdateSkillPro Chance=%3.1f%% missed", Chance / 10.0);
+    sLog.Out(LOG_BASIC, LOG_LVL_DEBUG, "Player::UpdateSkillPro Chance=%3.1f%% missed", chance / 10.0);
     return true;
 }
 
@@ -6729,7 +6765,7 @@ void Player::CheckAreaExploreAndOutdoor()
             uint32 xp = 0;
             if (p->AreaLevel > 0 && GetLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
             {
-                float const explorationRate = GetPersonalXpRate() >= 0.0f ? GetPersonalXpRate() : sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE);
+                float const explorationRate = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE);
                 int32 const diff = int32(GetLevel()) - p->AreaLevel;
                 if (diff < -5)
                     xp = uint32(sObjectMgr.GetBaseXP(GetLevel() + 5) * explorationRate);
@@ -6991,12 +7027,12 @@ void Player::RewardReputation(Quest const* pQuest)
         {
             int32 rep = CalculateReputationGain(REPUTATION_SOURCE_QUEST,  pQuest->RewRepValue[i], pQuest->RewRepFaction[i], GetQuestLevelForPlayer(pQuest));
 
+            bool noSpillover = (pQuest->GetRewRepSpilloverMask() & (1 << i)) != 0;
+
             if (FactionEntry const* factionEntry = sObjectMgr.GetFactionEntry(pQuest->RewRepFaction[i]))
-                GetReputationMgr().ModifyReputation(factionEntry, rep);
+                GetReputationMgr().ModifyReputation(factionEntry, rep, noSpillover);
         }
     }
-
-    // TODO: implement reputation spillover
 }
 
 uint32 Player::GetGuildIdFromDB(ObjectGuid guid)
@@ -10297,8 +10333,13 @@ InventoryResult Player::CanUnequipItem(uint16 pos, bool swap) const
     if (pItem->HasTemporaryLoot())
         return EQUIP_ERR_ALREADY_LOOTED;
 
-    // do not allow unequipping gear except weapons, offhands, projectiles, relics in
-    // - combat
+    // you cannot unequip main hand weapon while disarmed
+#if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_6_1
+    if (IsMainHandPos(pos) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED))
+        return EQUIP_ERR_NOT_WHILE_DISARMED;
+#endif
+
+    // do not allow unequipping gear except weapons, offhands, projectiles, relics in combat
     if (!pProto->CanChangeEquipStateInCombat())
     {
         if (IsInCombat())
@@ -13601,7 +13642,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, WorldObject* questE
     q_status.m_reward_choice = pQuest->RewChoiceItemId[reward];
 
     // Used for client inform but rewarded only in case not max level
-    uint32 xp = uint32(pQuest->XPValue(this) * (GetPersonalXpRate() >= 0.0f ? GetPersonalXpRate() : sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST)));
+    uint32 xp = uint32(pQuest->XPValue(this) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST));
 
     if (GetLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         GiveXP(xp , nullptr);
@@ -14667,6 +14708,14 @@ void Player::LogModifyMoney(int32 d, char const* type, ObjectGuid fromGuid, uint
     ModifyMoney(d);
 }
 
+uint32 Player::GetMaxMoney() const
+{
+    if (GetSession()->HasTrialRestrictions())
+        return MAX_TRIAL_MONEY_AMOUNT;
+
+    return MAX_MONEY_AMOUNT;
+}
+
 void Player::MoneyChanged(uint32 count)
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -15037,8 +15086,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     //"honor_rank_points, honor_highest_rank, honor_standing, honor_last_week_hk, honor_last_week_cp, honor_stored_hk, honor_stored_dk,"
     // 48                49     50      51      52      53      54      55      56              57               58       59
     //"watched_faction,  drunk, health, power1, power2, power3, power4, power5, explored_zones, equipment_cache, ammo_id, action_bars,"
-    // 60                61
-    //"world_phase_mask, create_time FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+    // 60                61           62
+    //"world_phase_mask, create_time, instance FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
 
     std::unique_ptr<QueryResult> result = holder->TakeResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
@@ -15097,8 +15146,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     InitPlayerDisplayIds();                                       // model, scale and model data
 
     uint32 money = fields[8].GetUInt32();
-    if (money > MAX_MONEY_AMOUNT)
-        money = MAX_MONEY_AMOUNT;
+    if (money > GetMaxMoney())
+        money = GetMaxMoney();
     SetMoney(money);
 
     SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID, fields[9].GetUInt8());
@@ -15241,7 +15290,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         if (GenericTransport* transport = GetMap()->GetTransport(guid))
         {
             float x = fields[30].GetFloat(), y = fields[31].GetFloat(), z = fields[32].GetFloat(), o = fields[33].GetFloat();
-            m_movementInfo.SetTransportData(guid, x, y, z, o, 0);
+            m_movementInfo.SetTransportData(guid, x, y, z, o);
             transport->CalculatePassengerPosition(x, y, z, &o);
 
             if (!MaNGOS::IsValidMapCoord(x, y, z, o) ||
@@ -15295,7 +15344,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     if (mapEntry && mapEntry->IsDungeon())
     {
         // if the player is in an instance and it has been reset in the meantime teleport him to the entrance
-        if (!state)
+        uint32 instanceId = fields[62].GetUInt32();
+        if (!state || state->GetInstanceId() != instanceId)
         {
             AreaTriggerTeleport const* at = sObjectMgr.GetGoBackTrigger(GetMapId());
             if (at)
@@ -16802,7 +16852,7 @@ void Player::SaveToDB(bool online, bool force)
     static SqlStatementID insChar;
 
     SqlStatement uberInsert = CharacterDatabase.CreateStatement(insChar, "REPLACE INTO `characters` (`guid`, `account`, `name`, `race`, `class`, `gender`, `level`, `xp`, `money`, `skin`, `face`, `hair_style`, `hair_color`, `facial_hair`, `bank_bag_slots`, `player_flags`,"
-                              "`map`, `position_x`, `position_y`, `position_z`, `orientation`, "
+                              "`map`, `instance`, `position_x`, `position_y`, `position_z`, `orientation`, "
                               "`transport_guid`, `transport_x`, `transport_y`, `transport_z`, `transport_o`, "
                               "`known_taxi_mask`, `current_taxi_path`, `online`, `played_time_total`, `played_time_level`, "
                               "`rest_bonus`, `logout_time`, `is_logout_resting`, `reset_talents_multiplier`, `reset_talents_time`, "
@@ -16811,7 +16861,7 @@ void Player::SaveToDB(bool online, bool force)
                               "`watched_faction`, `drunk`, `health`, `power1`, `power2`, `power3`, `power4`, `power5`, "
                               "`explored_zones`, `equipment_cache`, `ammo_id`, `action_bars`, `world_phase_mask`, `create_time`) "
                               "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                              "?, ?, ?, ?, ?, "
+                              "?, ?, ?, ?, ?, ?, "
                                "?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, "
@@ -16845,6 +16895,7 @@ void Player::SaveToDB(bool online, bool force)
     if (!IsBeingTeleported())
     {
         uberInsert.addUInt32(GetMapId());
+        uberInsert.addUInt32(GetInstanceId());
         uberInsert.addFloat(finiteAlways(GetPositionX()));
         uberInsert.addFloat(finiteAlways(GetPositionY()));
         uberInsert.addFloat(finiteAlways(GetPositionZ()));
@@ -16853,6 +16904,7 @@ void Player::SaveToDB(bool online, bool force)
     else
     {
         uberInsert.addUInt32(GetTeleportDest().mapId);
+        uberInsert.addUInt32(0);
         uberInsert.addFloat(finiteAlways(GetTeleportDest().x));
         uberInsert.addFloat(finiteAlways(GetTeleportDest().y));
         uberInsert.addFloat(finiteAlways(GetTeleportDest().z));
@@ -18012,7 +18064,7 @@ bool Player::HasInstantCastingSpellMod(SpellEntry const* spellInfo) const
 {
     for (const auto& mod : m_spellMods[SPELLMOD_CASTING_TIME])
     {
-        if ((mod->type == SPELLMOD_PCT) && (mod->value <= -100) && mod->isAffectedOnSpell(spellInfo))
+        if ((mod->type == SPELLMOD_PCT) && (mod->value <= -100) && mod->IsAffectedOnSpell(spellInfo))
             return true;
     }
     return false;
@@ -18033,7 +18085,7 @@ bool Player::IsAffectedBySpellmod(SpellEntry const* spellInfo, SpellModifier con
             return false;
     }
 
-    return mod->isAffectedOnSpell(spellInfo);
+    return mod->IsAffectedOnSpell(spellInfo);
 }
 
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
@@ -20249,9 +20301,6 @@ uint32 Player::SelectResurrectionSpellId() const
                 case 20765:
                     spellId = 20761;
                     break;        // rank 5
-                case 27239:
-                    spellId = 27240;
-                    break;        // rank 6
                 default:
                     sLog.Out(LOG_BASIC, LOG_LVL_ERROR, "Unhandled spell %u: S.Resurrection", dummyAura->GetId());
                     continue;
