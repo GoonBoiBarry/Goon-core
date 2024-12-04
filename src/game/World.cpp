@@ -626,6 +626,11 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_OBJECT_HEALTH_VALUE_SHOW, "ShowHealthValues", false);
     if (configNoReload(reload, CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", PLAYER_MAX_LEVEL))
         setConfigMinMax(CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", PLAYER_MAX_LEVEL, 1, PLAYER_STRONG_MAX_LEVEL);
+	setConfig(CONFIG_UINT32_TACT_1, "TacticalMastery1", 50);
+	setConfig(CONFIG_UINT32_TACT_2, "TacticalMastery2", 100);
+	setConfig(CONFIG_UINT32_TACT_3, "TacticalMastery3", 150);
+	setConfig(CONFIG_UINT32_TACT_4, "TacticalMastery4", 200);
+	setConfig(CONFIG_UINT32_TACT_5, "TacticalMastery5", 250);
     setConfigMinMax(CONFIG_UINT32_START_PLAYER_LEVEL, "StartPlayerLevel", 1, 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     setConfigMinMax(CONFIG_UINT32_START_PLAYER_MONEY, "StartPlayerMoney", 0, 0, MAX_MONEY_AMOUNT);
     setConfig(CONFIG_UINT32_MIN_HONOR_KILLS, "MinHonorKills", 0);
@@ -984,6 +989,15 @@ void World::LoadConfigSettings(bool reload)
     setConfigMinMax(CONFIG_UINT32_BATTLE_BOT_AUTO_EQUIP, "BattleBot.AutoEquip", PLAYER_BOT_AUTO_EQUIP_RANDOM_GEAR, PLAYER_BOT_AUTO_EQUIP_STARTING_GEAR, PLAYER_BOT_AUTO_EQUIP_PREMADE_GEAR);
     setConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE_DOWN, "PartyBot.RandomGearLevelDifferenceDown", 10);
     setConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE_UP, "PartyBot.RandomGearLevelDifferenceUp", 3);
+	setConfig(CONFIG_UINT32_PARTY_BOT_PALADIN_MOUNT, "PartyBot.PaladinMount", 13819);
+	setConfig(CONFIG_UINT32_PARTY_BOT_ROGUE_MOUNT, "PartyBot.RogueMount", 10793);
+	setConfig(CONFIG_UINT32_PARTY_BOT_HUNTER_MOUNT, "PartyBot.HunterMount", 6899);
+	setConfig(CONFIG_UINT32_PARTY_BOT_MAGE_MOUNT, "PartyBot.MageMount", 10873);
+	setConfig(CONFIG_UINT32_PARTY_BOT_WARLOCK_MOUNT, "PartyBot.WarlockMount", 13819);
+	setConfig(CONFIG_UINT32_PARTY_BOT_SHAMAN_MOUNT, "PartyBot.ShamanMount", 13819);
+	setConfig(CONFIG_UINT32_PARTY_BOT_PRIEST_MOUNT, "PartyBot.PriestMount", 13819);
+	setConfig(CONFIG_UINT32_PARTY_BOT_DRUID_MOUNT, "PartyBot.DruidMount", 13819);
+	setConfig(CONFIG_UINT32_DRUID_AOE_RAGE, "PartyBot.DruidRageAoeUsage", 50);
 
     setConfigMinMax(CONFIG_UINT32_SPELL_EFFECT_DELAY, "Spell.EffectDelay", 400, 0, 1000);
     setConfigMinMax(CONFIG_UINT32_SPELL_PROC_DELAY, "Spell.ProcDelay", 400, 0, 1000);
