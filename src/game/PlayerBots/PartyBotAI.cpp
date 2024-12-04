@@ -838,7 +838,22 @@ void PartyBotAI::UpdateAI(uint32 const diff)
                 {
                     bool oldState = me->HasCheatOption(PLAYER_CHEAT_NO_CAST_TIME);
                     me->SetCheatOption(PLAYER_CHEAT_NO_CAST_TIME, true);
-                    me->CastSpell(me, (*auraList.begin())->GetId(), true);
+					if (me->GetClass() == CLASS_PALADIN)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_PALADIN_MOUNT), true);
+					if (me->GetClass() == CLASS_ROGUE)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_ROGUE_MOUNT), true);
+					if (me->GetClass() == CLASS_HUNTER)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_HUNTER_MOUNT), true);
+					if (me->GetClass() == CLASS_MAGE)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_MAGE_MOUNT), true);
+					if (me->GetClass() == CLASS_WARLOCK)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_WARLOCK_MOUNT), true);
+					if (me->GetClass() == CLASS_SHAMAN)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_SHAMAN_MOUNT), true);
+					if (me->GetClass() == CLASS_PRIEST)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_PRIEST_MOUNT), true);
+					if (me->GetClass() == CLASS_DRUID)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_DRUID_MOUNT), true);
                     me->SetCheatOption(PLAYER_CHEAT_NO_CAST_TIME, oldState);
                 } 
             }
@@ -927,9 +942,19 @@ void PartyBotAI::UpdateInCombatAI()
 {
     if (!IsInDuel())
     {
+        Player* pLeader = GetPartyLeader();
+        Unit* pVictim = me->GetVictim();
+
+
         if (m_role == ROLE_TANK)
         {
-            Unit* pVictim = me->GetVictim();
+            // Attack marked if exist
+            if (m_marksToFocus.size() != 0)
+            {
+                pVictim = SelectAttackTarget(pLeader);
+                AttackStart(pVictim);
+                return;              
+            }
 
             // Defend party members.
             if (!pVictim || pVictim->GetVictim() == me)
@@ -954,7 +979,20 @@ void PartyBotAI::UpdateInCombatAI()
                 }
             }
         }
-        else if (CrowdControlMarkedTargets())
+        
+        // Swap DPS to marked target or party leader's target
+        if (m_role == ROLE_MELEE_DPS || m_role == ROLE_RANGE_DPS)
+        {
+            Unit* newVictim = SelectAttackTarget(pLeader);
+
+            if (newVictim && (newVictim != pVictim))
+            {
+                AttackStart(newVictim);
+                return;
+            }
+        }
+
+        if (CrowdControlMarkedTargets())
             return;
     }
 
@@ -1152,7 +1190,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
         if (Unit* pVictim = me->GetVictim())
         {
             if (hasSeal && m_spells.paladin.pJudgement &&
-               (me->GetPowerPercent(POWER_MANA) > 30.0f) &&
+               (me->GetPowerPercent(POWER_MANA) > 5.0f) &&
                 CanTryToCastSpell(pVictim, m_spells.paladin.pJudgement))
             {
                 if (DoCastSpell(pVictim, m_spells.paladin.pJudgement) == SPELL_CAST_OK)
@@ -1174,7 +1212,6 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                     return;
             }
             if (m_spells.paladin.pConsecration &&
-               (GetAttackersInRangeCount(10.0f) > 2) &&
                 CanTryToCastSpell(me, m_spells.paladin.pConsecration))
             {
                 if (DoCastSpell(me, m_spells.paladin.pConsecration) == SPELL_CAST_OK)
@@ -1218,17 +1255,6 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
         }
     }
 
-    if (m_spells.paladin.pBlessingOfFreedom &&
-       (me->HasUnitState(UNIT_STAT_ROOT) || me->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED)) &&
-        CanTryToCastSpell(me, m_spells.paladin.pBlessingOfFreedom))
-    {
-        if (DoCastSpell(me, m_spells.paladin.pBlessingOfFreedom) == SPELL_CAST_OK)
-            return;
-    }
-    
-    if (GetRole() != ROLE_HEALER &&
-        me->GetHealthPercent() < 30.0f)
-        HealInjuredTarget(me);
 }
 
 void PartyBotAI::UpdateOutOfCombatAI_Shaman()
@@ -1248,7 +1274,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Shaman()
     }
 
     if (m_role == ROLE_HEALER &&
-        FindAndHealInjuredAlly(80.0f, 80.0f))
+        FindAndHealInjuredAlly(90.0f, 90.0f))
         return;
 
     if (me->GetVictim())
@@ -1372,7 +1398,7 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
         if (FindAndPreHealTarget())
             return;
     }
-    else if (me->GetHealthPercent() < 20.0f)
+    else if (me->GetHealthPercent() < 45.0f)
         HealInjuredTarget(me);
 }
 
@@ -1464,7 +1490,22 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
             if (DoCastSpell(pVictim, m_spells.hunter.pAimedShot) == SPELL_CAST_OK)
                 return;
         }
+		
 
+        if (m_spells.hunter.pRapidFire &&
+            CanTryToCastSpell(pVictim, m_spells.hunter.pRapidFire))
+        {
+            if (DoCastSpell(pVictim, m_spells.hunter.pRapidFire) == SPELL_CAST_OK)
+                return;
+        }
+
+        if (m_spells.hunter.pMultiShot &&
+            CanTryToCastSpell(pVictim, m_spells.hunter.pMultiShot))
+        {
+            if (DoCastSpell(pVictim, m_spells.hunter.pMultiShot) == SPELL_CAST_OK)
+                return;
+        }		
+		
         if (m_spells.hunter.pArcaneShot &&
             CanTryToCastSpell(pVictim, m_spells.hunter.pArcaneShot))
         {
@@ -1476,13 +1517,6 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
             CanTryToCastSpell(pVictim, m_spells.hunter.pSerpentSting))
         {
             if (DoCastSpell(pVictim, m_spells.hunter.pSerpentSting) == SPELL_CAST_OK)
-                return;
-        }
-
-        if (m_spells.hunter.pMultiShot &&
-            CanTryToCastSpell(pVictim, m_spells.hunter.pMultiShot))
-        {
-            if (DoCastSpell(pVictim, m_spells.hunter.pMultiShot) == SPELL_CAST_OK)
                 return;
         }
 
@@ -1580,13 +1614,16 @@ void PartyBotAI::UpdateOutOfCombatAI_Mage()
 
     if (m_spells.mage.pArcaneBrilliance)
     {
-        if (CanTryToCastSpell(me, m_spells.mage.pArcaneBrilliance))
+        if (Player* pTarget = SelectBuffTarget(m_spells.mage.pArcaneBrilliance))
         {
-            if (DoCastSpell(me, m_spells.mage.pArcaneBrilliance) == SPELL_CAST_OK)
+            if (CanTryToCastSpell(pTarget, m_spells.mage.pArcaneBrilliance))
             {
-                m_isBuffing = true;
-                me->ClearTarget();
-                return;
+                if (DoCastSpell(pTarget, m_spells.mage.pArcaneBrilliance) == SPELL_CAST_OK)
+                {
+                    m_isBuffing = true;
+                    me->ClearTarget();
+                    return;
+                }
             }
         }
     }
@@ -1670,7 +1707,7 @@ void PartyBotAI::UpdateInCombatAI_Mage()
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
             && me->GetDistance(pVictim) > 30.0f)
         {
-            me->GetMotionMaster()->MoveChase(pVictim, 30.0f);
+            me->GetMotionMaster()->MoveChase(pVictim, 25.0f);
         }
         else if (GetAttackersInRangeCount(10.0f))
         {
@@ -1997,7 +2034,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Priest()
     }
 
     if (m_role == ROLE_HEALER &&
-        FindAndHealInjuredAlly(80.0f, 80.0f))
+        FindAndHealInjuredAlly(90.0f, 90.0f))
         return;
 
     if (me->GetVictim())
@@ -2842,7 +2879,7 @@ void PartyBotAI::UpdateInCombatAI_Rogue()
             // Give priority to Slice and Dice over other finishing moves.
             if (m_spells.rogue.pSliceAndDice &&
                !me->HasAura(m_spells.rogue.pSliceAndDice->Id) &&
-                pVictim->GetHealthPercent() > 15.0f)
+                pVictim->GetHealthPercent() > 10.0f)
                 vSpells.push_back(m_spells.rogue.pSliceAndDice);
             else if (me->GetComboPoints() > 4)
             {
@@ -3086,7 +3123,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Druid()
             return;
 
         if ((me->GetPowerPercent(POWER_MANA) > 80.0f) &&
-            FindAndHealInjuredAlly())
+            FindAndHealInjuredAlly(80.0f, 90.0f))
             return;
     }
     else if (me->GetShapeshiftForm() == FORM_CAT)
@@ -3326,7 +3363,7 @@ void PartyBotAI::UpdateInCombatAI_Druid()
             }
 
             if (m_spells.druid.pFrenziedRegeneration &&
-                (me->GetHealthPercent() < 30.0f) &&
+                (me->GetHealthPercent() < 45.0f) &&
                 CanTryToCastSpell(me, m_spells.druid.pFrenziedRegeneration))
             {
                 if (DoCastSpell(me, m_spells.druid.pFrenziedRegeneration) == SPELL_CAST_OK)
@@ -3340,7 +3377,7 @@ void PartyBotAI::UpdateInCombatAI_Druid()
                     return;
             }
 
-            if ((me->GetPower(POWER_RAGE) > 80) ||
+            if ((me->GetPower(POWER_RAGE) > sWorld.getConfig(CONFIG_UINT32_DRUID_AOE_RAGE)) ||
                 (GetAttackersInRangeCount(10.0f) > 1))
             {
                 if (m_spells.druid.pDemoralizingRoar &&
