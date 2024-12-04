@@ -6100,6 +6100,7 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
             uint32 absorb = 0;
             int32 resist = 0;
             float StarshardsDamage;
+    		float StarfallDamage;
             float fdamage;
             CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL, 0, 0);
 
@@ -6138,6 +6139,11 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
 				else
 				    StarshardsDamage = 5;
                 fdamage += (-1 + (StarshardsDamage - 1) / 2) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 3.0);
+			}
+            else if (spellProto->SpellIconID == 225 && spellProto->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_STARSHARDS>())
+			{
+				StarfallDamage = urand(1, 5);
+                fdamage += (-1 + (StarfallDamage - 1) / 2) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 3.0);
 			}
             // SpellDamageBonus for magic spells
             if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
