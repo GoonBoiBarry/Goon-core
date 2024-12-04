@@ -634,7 +634,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         // Wowwiki the useless has this on 60sec cd,
         // but sampling a random vanilla video, the shortest cd was 60sec, with one as high as 142sec.
         // Setting this to 60-75 as a slight buff
-        events.Repeat(Seconds(urand(60, 75)));
+        events.Repeat(Seconds(urand(60, 120)));
     }
 
     void UpdateP2P3(uint32 diff)
