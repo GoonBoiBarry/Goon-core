@@ -1669,8 +1669,8 @@ void CombatBotBaseAI::PopulateSpellData()
             else
                 m_spells.paladin.pSeal = pSealOfRighteousness;
 
-            if (pBlessingOfSanctuary && m_role == ROLE_TANK)
-                m_spells.paladin.pBlessingBuff = pBlessingOfSanctuary;
+            if (pBlessingOfKings)
+                m_spells.paladin.pBlessingBuff = pBlessingOfKings;
             else
             {
                 std::vector<SpellEntry const*> blessings;
@@ -1687,7 +1687,11 @@ void CombatBotBaseAI::PopulateSpellData()
                 if (!blessings.empty())
                     m_spells.paladin.pBlessingBuff = SelectRandomContainerElement(blessings);
             }
-
+			
+			if (pSanctityAura)
+				m_spells.paladin.pAura = pSanctityAura;
+			else
+			{
             std::vector<SpellEntry const*> auras;
             if (pDevotionAura)
                 auras.push_back(pDevotionAura);
@@ -1705,7 +1709,7 @@ void CombatBotBaseAI::PopulateSpellData()
                 auras.push_back(pFireResistanceAura);
             if (!auras.empty())
                 m_spells.paladin.pAura = SelectRandomContainerElement(auras);
-
+			}
             break;
         }
         case CLASS_SHAMAN:
