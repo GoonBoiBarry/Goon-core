@@ -2671,19 +2671,19 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                             switch (aurasOverrideClassScript->GetModifier()->m_miscvalue)
                             {
                                 case 831:
-                                    Rage_val =  50;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_1);
                                     break;
                                 case 832:
-                                    Rage_val = 100;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_2);
                                     break;
                                 case 833:
-                                    Rage_val = 150;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_3);
                                     break;
                                 case 834:
-                                    Rage_val = 200;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_4);
                                     break;
                                 case 835:
-                                    Rage_val = 250;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_5);
                                     break;
                             }
                             if (Rage_val != 0)
