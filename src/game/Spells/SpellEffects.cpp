@@ -5145,18 +5145,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex effIdx)
                         }
                     }
 
-                    int numTargets = std::min(int(viableTargets.size()), 5)-1; // leaving 1 target not MCed to avoid reset due to all MCed
-
-                    // always MC maintank
-                    if (Unit* maintank = m_casterUnit->GetVictim())
-                    {
-                        auto it = std::find(viableTargets.begin(), viableTargets.end(), maintank);
-                        if (it != viableTargets.end())
-                            viableTargets.erase(it);
-                        numTargets -= 1;
-                        maintank->CastSpell(maintank, 28409, true); // modifies scale
-                        m_casterUnit->CastSpell(maintank, 28410, true); // applies dmg and healing mod, as well as the charm itself
-                    }
+                    int numTargets = std::min(int(viableTargets.size()), 2)-1; // leaving 1 target not MCed to avoid reset due to all MCed
 
                     for (int i = 0; i < numTargets; i++)
                     {
