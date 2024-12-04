@@ -396,7 +396,7 @@ struct boss_gothikAI : public ScriptedAI
             {
                 if (m_uiSpeechTimer < uiDiff)
                 {
-                    if (HasLessPlayersPerSide(10))
+                    if (HasLessPlayersPerSide(0))
                     {
                         EnterEvadeMode();
                         return;
