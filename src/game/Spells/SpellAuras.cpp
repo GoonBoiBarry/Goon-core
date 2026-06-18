@@ -2516,19 +2516,19 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                             switch (aurasOverrideClassScript->GetModifier()->m_miscvalue)
                             {
                                 case 831:
-                                    Rage_val =  50;
+                                    Rage_val =  sWorld.getConfig(CONFIG_UINT32_TACT_1);;
                                     break;
                                 case 832:
-                                    Rage_val = 100;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_2);;
                                     break;
                                 case 833:
-                                    Rage_val = 150;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_3);;
                                     break;
                                 case 834:
-                                    Rage_val = 200;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_4);;
                                     break;
                                 case 835:
-                                    Rage_val = 250;
+                                    Rage_val = sWorld.getConfig(CONFIG_UINT32_TACT_5);;
                                     break;
                             }
                             if (Rage_val != 0)
@@ -5716,6 +5716,12 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                         DoneActualBenefit = caster->SpellBaseHealingBonusDone(spellProto->GetSpellSchoolMask()) * 0.1f;
                         break;
                     }
+					else if (spellProto->IsFitToFamilyMask<CF_PRIEST_ELUNE_SHELTER>())
+                    {
+                        //+20% from +healing bonus
+                        DoneActualBenefit = caster->SpellBaseHealingBonusDone(spellProto->GetSpellSchoolMask()) * 0.2f;
+                        break;
+                    }
                     break;
                 case SPELLFAMILY_MAGE:
                     // Frost ward, Fire ward
@@ -5786,6 +5792,7 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
 
             uint32 absorb = 0;
             int32 resist = 0;
+            float StarshardsDamage
             float fdamage;
             CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL, 0, 0);
 
@@ -5818,8 +5825,16 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
             else if (spellProto->IsFitToFamily<SPELLFAMILY_WARLOCK, CF_WARLOCK_CURSE_OF_AGONY>())
                 fdamage += (-1 + ((int)GetAuraTicks() - 1) / 4) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 2.0);
             // Starshards damage-per-tick calculation
-            else if (spellProto->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_STARSHARDS>())
-                fdamage += (-1 + ((int)GetAuraTicks() - 1) / 2) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 3.0);
+            else if (spellProto->SpellIconID == 1485 && spellProto->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_STARSHARDS>())
+			{
+				if (pCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->GetCastedTime() > 3500)
+					StarshardsDamage = 1;
+				else if (pCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->GetCastedTime() > 1500)
+					StarshardsDamage = 3;
+				else
+				    StarshardsDamage = 5;
+                fdamage += (-1 + (StarshardsDamage - 1) / 2) * (spellProto->CalculateSimpleValue(EFFECT_INDEX_0) / 3.0);
+			}
 
             // SpellDamageBonus for magic spells
             if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
