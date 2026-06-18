@@ -163,6 +163,7 @@ enum ClassFlag
     CF_PRIEST_MISC2                         = 31,   // CM0 80000000
 
     CF_PRIEST_DISPELLS                       = 32,   // CM1 00000001
+	CF_PRIEST_ELUNE_SHELTER					= 33,	// CM1 00000001
 
     // -- Druid (7)
     CF_DRUID_WRATH                          = 0,    // CM0 00000001
