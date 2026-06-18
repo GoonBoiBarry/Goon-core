@@ -3077,11 +3077,13 @@ void CombatBotBaseAI::UpdateVisualHonorRankBasedOnItems()
 
 void CombatBotBaseAI::BeginChasing(Unit* pVictim) const
 {
-    if ((m_role == ROLE_RANGE_DPS || m_role == ROLE_HEALER) &&
-        IsRangedDamageClass(me->GetClass()) &&
-       !IsAttackSpeedOverridenForm(me->GetShapeshiftForm()) &&
-       (me->GetPowerPercent(POWER_MANA) > 10.0f || me->GetWeaponForAttack(RANGED_ATTACK, true, true)))
-        me->SetCasterChaseDistance(25.0f);
+     if (GetRole() == ROLE_RANGE_DPS || GetRole() == ROLE_NO_DISPEL_DPS || GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS)
+	{
+		if (me->GetClass() != CLASS_PRIEST)
+			me->SetCasterChaseDistance(30.0f);
+		else
+			me->SetCasterChaseDistance(24.0f);
+	}
     else if (me->HasDistanceCasterMovement())
         me->SetCasterChaseDistance(0.0f);
 
