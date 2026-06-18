@@ -1069,8 +1069,12 @@ bool ChatHandler::HandlePartyBotSetRoleCommand(char* args)
         role = ROLE_MELEE_DPS;
     else if (roleStr == "rangedps")
         role = ROLE_RANGE_DPS;
+    else if (roleStr == "nodispeldps")
+        role = ROLE_NO_DISPEL_DPS;
     else if (roleStr == "healer")
         role = ROLE_HEALER;
+	else if (roleStr == "nototems")
+		role = ROLE_NO_TOTEMS;
 
     if (role == ROLE_INVALID)
         return false;
@@ -1539,7 +1543,29 @@ bool ChatHandler::HandlePartyBotComeToMeCommand(char* args)
     Player* pPlayer = GetSession()->GetPlayer();
     Player* pTarget = GetSelectedPlayer();
 
+    uint8 botClass = 0;
+    std::string classStr = args;
+    
     bool ok = false;
+
+    if (classStr == "druid")
+        botClass = CLASS_DRUID;
+    else if (classStr == "warrior")
+        botClass = CLASS_WARRIOR;
+    else if (classStr == "paladin")
+        botClass = CLASS_PALADIN;
+    else if (classStr == "hunter")
+        botClass = CLASS_HUNTER;
+    else if (classStr == "rogue")
+        botClass = CLASS_ROGUE;
+    else if (classStr == "priest")
+        botClass = CLASS_PRIEST;
+    else if (classStr == "shaman")
+        botClass = CLASS_SHAMAN;
+    else if (classStr == "mage")
+        botClass = CLASS_MAGE;
+    else if (classStr == "warlock")
+        botClass = CLASS_WARLOCK;
 
     if (pTarget && pTarget != pPlayer)
     {
@@ -1556,16 +1582,14 @@ bool ChatHandler::HandlePartyBotComeToMeCommand(char* args)
         {
             if (Player* pMember = itr->getSource())
             {
-                if (pMember == pPlayer)
+                if (pMember->GetClass() != botClass && botClass != 0)
                     continue;
 
                 ok = HandlePartyBotComeToMeHelper(pMember, pPlayer) || ok;
             }
         }
-
-        if (ok)
-            SendSysMessage("All party bots are coming to your position.");
-        else
+        
+        if (!ok)
             SendSysMessage("There are no party bots in the group or they cannot move.");
         return ok;
     }
@@ -1779,7 +1803,7 @@ bool ChatHandler::HandlePartyBotPullCommand(char* args)
             {
                 if (PartyBotAI* pAI = dynamic_cast<PartyBotAI*>(pMember->AI()))
                 {
-                    if (pAI->m_role == ROLE_MELEE_DPS || pAI->m_role == ROLE_RANGE_DPS)
+                    if (pAI->m_role == ROLE_MELEE_DPS || pAI->m_role == ROLE_RANGE_DPS || pAI->m_role == ROLE_NO_DISPEL_DPS)
                     {
                         HandlePartyBotPauseApplyHelper(pMember, duration);
                         continue;
