@@ -635,6 +635,11 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_OBJECT_HEALTH_VALUE_SHOW, "ShowHealthValues", false);
     if (configNoReload(reload, CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", PLAYER_MAX_LEVEL))
         setConfigMinMax(CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", PLAYER_MAX_LEVEL, 1, PLAYER_STRONG_MAX_LEVEL);
+    setConfig(CONFIG_UINT32_TACT_1, "TacticalMastery1", 50);
+	setConfig(CONFIG_UINT32_TACT_2, "TacticalMastery2", 100);
+	setConfig(CONFIG_UINT32_TACT_3, "TacticalMastery3", 150);
+	setConfig(CONFIG_UINT32_TACT_4, "TacticalMastery4", 200);
+	setConfig(CONFIG_UINT32_TACT_5, "TacticalMastery5", 250);
     setConfigMinMax(CONFIG_UINT32_START_PLAYER_LEVEL, "StartPlayerLevel", 1, 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     setConfigMinMax(CONFIG_UINT32_START_PLAYER_MONEY, "StartPlayerMoney", 0, 0, MAX_MONEY_AMOUNT);
     setConfig(CONFIG_UINT32_MIN_HONOR_KILLS, "MinHonorKills", 0);
