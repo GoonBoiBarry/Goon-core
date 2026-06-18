@@ -112,7 +112,7 @@ void CombatBotBaseAI::AutoAssignRole()
             if (me->HasSpell(SPELL_MOONKIN_FORM))
                 m_role = ROLE_RANGE_DPS;
             else if (me->HasSpell(SPELL_LEADER_OF_THE_PACK))
-                m_role = ROLE_MELEE_DPS;
+                m_role = ROLE_TANK;
             else
                 m_role = ROLE_HEALER;
             return;
@@ -452,6 +452,16 @@ void CombatBotBaseAI::PopulateSpellData()
                     if (IsHigherRankSpell(m_spells.shaman.pGhostWolf))
                         m_spells.shaman.pGhostWolf = pSpellEntry;
                 }
+                else if (pSpellEntry->SpellName[0].find("Cure Disease") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.shaman.pCureDisease))
+                        m_spells.shaman.pCureDisease = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Cure Poison") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.shaman.pCurePoison))
+                        m_spells.shaman.pCurePoison = pSpellEntry;
+                }
                 else if (pSpellEntry->SpellName[0].find("Frostbrand Weapon") != std::string::npos)
                 {
                     if (IsHigherRankSpell(pFrostbrandWeapon))
@@ -590,6 +600,26 @@ void CombatBotBaseAI::PopulateSpellData()
                 {
                     if (IsHigherRankSpell(m_spells.hunter.pAspectOfTheMonkey))
                         m_spells.hunter.pAspectOfTheMonkey = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Aspect of the Pack") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pAspectOfThePack))
+                        m_spells.hunter.pAspectOfThePack = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Trueshot Aura") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pTrueshotAura))
+                        m_spells.hunter.pTrueshotAura = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Rapid Fire") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pRapidFire))
+                        m_spells.hunter.pRapidFire = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Scatter Shot") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.hunter.pScatterShot))
+                        m_spells.hunter.pScatterShot = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Serpent Sting") != std::string::npos)
                 {
@@ -879,6 +909,11 @@ void CombatBotBaseAI::PopulateSpellData()
                     if (IsHigherRankSpell(m_spells.priest.pAbolishDisease))
                         m_spells.priest.pAbolishDisease = pSpellEntry;
                 }
+                else if (pSpellEntry->SpellName[0].find("Cure Disease") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.priest.pCureDisease))
+                        m_spells.priest.pCureDisease = pSpellEntry;
+                }
                 else if (pSpellEntry->SpellName[0].find("Dispel Magic") != std::string::npos)
                 {
                     if (IsHigherRankSpell(m_spells.priest.pDispelMagic))
@@ -928,6 +963,16 @@ void CombatBotBaseAI::PopulateSpellData()
                 {
                     if (IsHigherRankSpell(m_spells.priest.pSmite))
                         m_spells.priest.pSmite = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Desperate Prayer") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.priest.pDesperatePrayer))
+                        m_spells.priest.pDesperatePrayer = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Fear Ward") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.priest.pFearWard))
+                        m_spells.priest.pFearWard = pSpellEntry;
                 }
                 break;
             }
@@ -1600,6 +1645,11 @@ void CombatBotBaseAI::PopulateSpellData()
                     if (IsHigherRankSpell(m_spells.druid.pProwl))
                         m_spells.druid.pProwl = pSpellEntry;
                 }
+                else if (pSpellEntry->SpellName[0].find("Omen of Clarity") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(m_spells.druid.pOmenofClarity))
+                        m_spells.druid.pOmenofClarity = pSpellEntry;
+                }
                 break;
             }
         }
@@ -1646,8 +1696,8 @@ void CombatBotBaseAI::PopulateSpellData()
             else
                 m_spells.paladin.pSeal = pSealOfRighteousness;
 
-            if (pBlessingOfSanctuary && m_role == ROLE_TANK)
-                m_spells.paladin.pBlessingBuff = pBlessingOfSanctuary;
+            if (pBlessingOfKings)
+                m_spells.paladin.pBlessingBuff = pBlessingOfKings;
             else
             {
                 std::vector<SpellEntry const*> blessings;
@@ -1664,7 +1714,11 @@ void CombatBotBaseAI::PopulateSpellData()
                 if (!blessings.empty())
                     m_spells.paladin.pBlessingBuff = SelectRandomContainerElement(blessings);
             }
-
+            
+			if (pSanctityAura)
+				m_spells.paladin.pAura = pSanctityAura;
+			else
+            {
             std::vector<SpellEntry const*> auras;
             if (pDevotionAura)
                 auras.push_back(pDevotionAura);
@@ -1682,7 +1736,7 @@ void CombatBotBaseAI::PopulateSpellData()
                 auras.push_back(pFireResistanceAura);
             if (!auras.empty())
                 m_spells.paladin.pAura = SelectRandomContainerElement(auras);
-
+            }
             break;
         }
         case CLASS_SHAMAN:
@@ -1720,7 +1774,7 @@ void CombatBotBaseAI::PopulateSpellData()
                 fireTotems.push_back(pFireNovaTotem);
             if (pMagmaTotem)
                 fireTotems.push_back(pMagmaTotem);
-            if (pSearingTotem)
+            if (pSearingTotem && m_role != ROLE_HEALER)
                 fireTotems.push_back(pSearingTotem);
             if (pFlametongueTotem)
                 fireTotems.push_back(pFlametongueTotem);
@@ -1984,7 +2038,7 @@ bool CombatBotBaseAI::IsValidHealTarget(Unit const* pTarget, float healthPercent
     return (pTarget->GetHealthPercent() < healthPercent) &&
             me->IsValidHelpfulTarget(pTarget) &&
             me->IsWithinLOSInMap(pTarget) &&
-            me->IsWithinDist(pTarget, 30.0f);
+            me->IsWithinDist(pTarget, 38.0f);
 }
 
 Unit* CombatBotBaseAI::SelectHealTarget(float selfHealPercent, float groupHealPercent) const
@@ -2640,7 +2694,8 @@ void CombatBotBaseAI::EquipRandomGearInEmptySlots()
         }
 
         // Avoid low level items
-        if ((pProto->ItemLevel + sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE)) < me->GetLevel())
+        // Avoid low level items and higher level items (custom value change to raid you've completed)!!!!
+        if ((pProto->ItemLevel + sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE_DOWN)) < me->GetLevel() || (pProto->ItemLevel - sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_RANDOM_GEAR_LEVEL_DIFFERENCE_UP)) > me->GetLevel())
             continue;
 
         if (me->CanUseItem(pProto, onlyPvE) != EQUIP_ERR_OK)
@@ -2842,7 +2897,7 @@ bool CombatBotBaseAI::CanTryToCastSpell(Unit const* pTarget, SpellEntry const* p
     if (pSpellEntry->GetErrorAtShapeshiftedCast(me->GetShapeshiftForm()) != SPELL_CAST_OK)
         return false;
 
-    if (pSpellEntry->IsSpellAppliesAura() && pTarget->HasAura(pSpellEntry->Id))
+    if (pSpellEntry->IsSpellAppliesAura() && pTarget->HasAura(pSpellEntry->Id) && pSpellEntry != m_spells.mage.pFrostbolt && pSpellEntry != m_spells.warrior.pSunderArmor)
         return false;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellEntry->rangeIndex);
