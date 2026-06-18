@@ -338,6 +338,10 @@ public:
             SpellEntry const* pAspectOfTheCheetah;
             SpellEntry const* pAspectOfTheMonkey;
             SpellEntry const* pAspectOfTheHawk;
+            SpellEntry const* pAspectOfThePack;
+            SpellEntry const* pTrueshotAura;
+            SpellEntry const* pRapidFire;
+            SpellEntry const* pScatterShot;
             SpellEntry const* pSerpentSting;
             SpellEntry const* pArcaneShot;
             SpellEntry const* pAimedShot;
@@ -396,6 +400,7 @@ public:
             SpellEntry const* pShadowWordPain;
             SpellEntry const* pInnerFocus;
             SpellEntry const* pAbolishDisease;
+            SpellEntry const* pCureDisease;
             SpellEntry const* pDispelMagic;
             SpellEntry const* pManaBurn;
             SpellEntry const* pDevouringPlague;
@@ -406,6 +411,8 @@ public:
             SpellEntry const* pFade;
             SpellEntry const* pShackleUndead;
             SpellEntry const* pSmite;
+            SpellEntry const* pDesperatePrayer;
+            SpellEntry const* pFearWard;
         } priest;
         struct
         {
@@ -551,6 +558,7 @@ public:
             SpellEntry const* pMaul;
             SpellEntry const* pBash;
             SpellEntry const* pFeralCharge;
+            SpellEntry const* pOmenofClarity;
         } druid;
     } m_spells;
 
