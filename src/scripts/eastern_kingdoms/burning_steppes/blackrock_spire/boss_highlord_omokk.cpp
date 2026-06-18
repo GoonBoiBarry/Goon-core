@@ -29,8 +29,7 @@ enum
     SPELL_STRIKE      = 18368,
     SPELL_REND        = 18106,
     SPELL_SUNDERARMOR = 24317,
-    SPELL_KNOCKAWAY   = 20686,
-    SPELL_SLOW        = 22356
+    SPELL_KNOCKAWAY   = 20686
 };
 
 struct boss_highlordomokkAI : public ScriptedAI
@@ -45,7 +44,6 @@ struct boss_highlordomokkAI : public ScriptedAI
     uint32 m_uiRendTimer;
     uint32 m_uiSunderArmorTimer;
     uint32 m_uiKnockAwayTimer;
-    uint32 m_uiSlowTimer;
 
     void Reset() override
     {
@@ -54,7 +52,6 @@ struct boss_highlordomokkAI : public ScriptedAI
         m_uiRendTimer        = 14000;
         m_uiSunderArmorTimer = 2000;
         m_uiKnockAwayTimer   = 18000;
-        m_uiSlowTimer        = 24000;
     }
 
     void UpdateAI(uint32 const uiDiff) override
@@ -107,15 +104,6 @@ struct boss_highlordomokkAI : public ScriptedAI
         }
         else
             m_uiKnockAwayTimer -= uiDiff;
-
-        // Slow
-        if (m_uiSlowTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_SLOW);
-            m_uiSlowTimer = 18000;
-        }
-        else
-            m_uiSlowTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
