@@ -287,7 +287,7 @@ public:
     {
         struct
         {
-            SpellEntry const* spells[45];
+            SpellEntry const* spells[46];
         } raw;
         struct
         {
@@ -511,13 +511,13 @@ public:
         } rogue;
         struct
         {
+            SpellEntry const* pMoonfire;
             SpellEntry const* pBearForm;
             SpellEntry const* pCatForm;
             SpellEntry const* pTravelForm;
             SpellEntry const* pAquaticForm;
             SpellEntry const* pMoonkinForm;
             SpellEntry const* pWrath;
-            SpellEntry const* pMoonfire;
             SpellEntry const* pStarfire;
             SpellEntry const* pHurricane;
             SpellEntry const* pInsectSwarm;
