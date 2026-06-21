@@ -1075,6 +1075,8 @@ bool ChatHandler::HandlePartyBotSetRoleCommand(char* args)
         role = ROLE_HEALER;
 	else if (roleStr == "nototems")
 		role = ROLE_NO_TOTEMS;
+    else if (roleStr == "nodispeltank")
+		role = ROLE_NO_DISPEL_TANK;
 
     if (role == ROLE_INVALID)
         return false;
@@ -1808,7 +1810,7 @@ bool ChatHandler::HandlePartyBotPullCommand(char* args)
                         HandlePartyBotPauseApplyHelper(pMember, duration);
                         continue;
                     }
-                    else if (pAI->m_role == ROLE_TANK)
+                    else if (pAI->m_role == ROLE_TANK || pAI->m_role == ROLE_NO_DISPEL_TANK)
                     {
                         if (pMember->IsValidAttackTarget(pTarget))
                             pAI->AttackStart(pTarget);
