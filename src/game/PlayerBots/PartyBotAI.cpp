@@ -1408,7 +1408,7 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
 	}
     
     if (m_spells.shaman.pManaTideTotem &&
-       (me->GetPowerPercent(POWER_MANA) < 50.0f) &&
+       (me->GetPowerPercent(POWER_MANA) < 70.0f) &&
         CanTryToCastSpell(me, m_spells.shaman.pManaTideTotem) && GetRole() != ROLE_NO_TOTEMS)
     {
         if (DoCastSpell(me, m_spells.shaman.pManaTideTotem) == SPELL_CAST_OK)
@@ -2254,7 +2254,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
     }
 
     if (m_spells.priest.pInnerFocus &&
-       (me->GetPowerPercent(POWER_MANA) < 75.0f) &&
+       (me->GetPowerPercent(POWER_MANA) < 90.0f) &&
         CanTryToCastSpell(me, m_spells.priest.pInnerFocus))
     {
         DoCastSpell(me, m_spells.priest.pInnerFocus);
@@ -2321,6 +2321,13 @@ void PartyBotAI::UpdateInCombatAI_Priest()
                 return;
         }
 
+        if (m_spells.priest.pMindFlay && (m_spells.priest.pInnerFocus && me->HasAura(m_spells.priest.pInnerFocus->Id && me->HasAura(33393)) &&
+            CanTryToCastSpell(pVictim, m_spells.priest.pMindFlay))
+        {
+            if (DoCastSpell(pVictim, m_spells.priest.pMindFlay) == SPELL_CAST_OK)
+                return;
+        }
+        
         if (m_spells.priest.pSilence &&
             pVictim->IsNonMeleeSpellCasted() &&
             CanTryToCastSpell(pVictim, m_spells.priest.pSilence))
@@ -2383,7 +2390,6 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         }
 
         if (m_spells.priest.pMindFlay &&
-           (!GetAttackersInRangeCount(10.0f) || me->HasAuraType(SPELL_AURA_SCHOOL_ABSORB)) &&
             CanTryToCastSpell(pVictim, m_spells.priest.pMindFlay))
         {
             if (DoCastSpell(pVictim, m_spells.priest.pMindFlay) == SPELL_CAST_OK)
