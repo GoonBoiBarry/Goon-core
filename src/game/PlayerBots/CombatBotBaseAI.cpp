@@ -3085,7 +3085,7 @@ void CombatBotBaseAI::BeginChasing(Unit* pVictim) const
 		if (me->GetClass() != CLASS_PRIEST)
 			me->SetCasterChaseDistance(30.0f);
 		else
-			me->SetCasterChaseDistance(24.0f);
+			me->SetCasterChaseDistance(28.0f);
 	}
     else if (me->HasDistanceCasterMovement())
         me->SetCasterChaseDistance(0.0f);
