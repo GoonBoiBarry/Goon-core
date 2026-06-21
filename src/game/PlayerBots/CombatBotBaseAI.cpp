@@ -2402,9 +2402,11 @@ void CombatBotBaseAI::SummonPetIfNeeded()
                 if (!pPet->IsAlive())
                     me->CastSpell(pPet, SPELL_REVIVE_PET, true);
             }
-            else
+            else 
+            {
                 me->CastSpell(me, SPELL_CALL_PET, true);
-
+                me->CastSpell(pPet, SPELL_REVIVE_PET, true);
+            }
             return;
         }
 
