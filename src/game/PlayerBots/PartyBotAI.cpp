@@ -2321,7 +2321,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
                 return;
         }
 
-        if (m_spells.priest.pMindFlay && (m_spells.priest.pInnerFocus && me->HasAura(m_spells.priest.pInnerFocus->Id && me->HasAura(33393)) &&
+        if (m_spells.priest.pMindFlay && (m_spells.priest.pInnerFocus && me->HasAura(m_spells.priest.pInnerFocus->Id && me->HasAura(33393))) &&
             CanTryToCastSpell(pVictim, m_spells.priest.pMindFlay))
         {
             if (DoCastSpell(pVictim, m_spells.priest.pMindFlay) == SPELL_CAST_OK)
