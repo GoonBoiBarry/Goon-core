@@ -22,6 +22,7 @@ enum CombatBotSpells
     SPELL_SHIELD_SLAM = 23922,
     SPELL_HOLY_SHIELD = 20925,
     SPELL_SANCTITY_AURA = 20218,
+    SPELL_CONSECRATION = 26573,
     SPELL_SHADOWFORM = 15473,
     SPELL_ELEMENTAL_MASTERY = 16166,
     SPELL_STORMSTRIKE = 17364,
@@ -81,7 +82,7 @@ void CombatBotBaseAI::AutoAssignRole()
         }
         case CLASS_PALADIN:
         {
-            if (me->HasSpell(SPELL_HOLY_SHIELD))
+            if (me->HasSpell(SPELL_HOLY_SHIELD) || me->HasSpell(SPELL_CONSECRATION))
                 m_role = ROLE_TANK;
             else if (me->HasSpell(SPELL_SANCTITY_AURA))
                 m_role = ROLE_MELEE_DPS;
