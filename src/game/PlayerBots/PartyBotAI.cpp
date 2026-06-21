@@ -279,7 +279,7 @@ bool PartyBotAI::CanTryToCastSpell(Unit const* pTarget, SpellEntry const* pSpell
             return false;
 
         // do not cast aoe if it will pull aggro
-        if (m_role != ROLE_TANK)
+        if (m_role != ROLE_TANK && m_role != ROLE_NO_DISPEL_TANK)
         {
             float radius;
             if (pSpellEntry->EffectRadiusIndex[0])
@@ -949,7 +949,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
         else
         {
             if (!me->HasUnitState(UNIT_STATE_MELEE_ATTACKING) &&
-               (GetRole() == ROLE_MELEE_DPS || m_role == ROLE_TANK) &&
+               (GetRole() == ROLE_MELEE_DPS || m_role == ROLE_TANK || m_role == ROLE_NO_DISPEL_TANK) &&
                 IsValidHostileTarget(pVictim) &&
                 AttackStart(pVictim))
                 return;
@@ -979,7 +979,7 @@ void PartyBotAI::UpdateOutOfCombatAI()
                     if (DoCastSpell(pTarget, m_resurrectionSpell) == SPELL_CAST_OK)
                         return;
 
-        if (m_role != ROLE_TANK && me->GetVictim() && CrowdControlMarkedTargets())
+        if (m_role != ROLE_TANK && m_role != ROLE_NO_DISPEL_TANK && me->GetVictim() && CrowdControlMarkedTargets())
             return;
     }
 
@@ -1022,7 +1022,7 @@ void PartyBotAI::UpdateInCombatAI()
         Player* pLeader = GetPartyLeader();
     	Player* pRogue = GetRogue();
         Unit* pVictim = me->GetVictim();
-        if (m_role == ROLE_TANK)
+        if (m_role == ROLE_TANK || m_role == ROLE_NO_DISPEL_TANK)
         {
             // Attack marked if exist
             if (m_marksToFocus.size() != 0)
@@ -1128,7 +1128,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Paladin()
             return;
     }
 
-    if (m_role == ROLE_TANK &&
+    if ((m_role == ROLE_TANK || m_role != ROLE_NO_DISPEL_TANK) &&
         m_spells.paladin.pRighteousFury &&
         CanTryToCastSpell(me, m_spells.paladin.pRighteousFury))
     {
@@ -1168,7 +1168,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
 {
     if (m_spells.paladin.pDivineShield &&
        (me->GetHealthPercent() < 20.0f) &&
-       (m_role != ROLE_TANK) &&
+       (m_role != ROLE_TANK || m_role != ROLE_NO_DISPEL_TANK) &&
         CanTryToCastSpell(me, m_spells.paladin.pDivineShield))
     {
         if (DoCastSpell(me, m_spells.paladin.pDivineShield) == SPELL_CAST_OK)
@@ -1200,7 +1200,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
         }
     }
     
-    if (m_spells.paladin.pCleanse)
+    if (m_spells.paladin.pCleanse && m_role != ROLE_NO_DISPEL_TANK)
     {
         if (Unit* pFriend = SelectDispelTarget(m_spells.paladin.pCleanse))
         {
@@ -1222,7 +1222,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
         }
 
         if (m_spells.paladin.pTurnEvil &&
-            m_role != ROLE_TANK)
+            (m_role != ROLE_TANK || m_role != ROLE_NO_DISPEL_TANK))
         {
             Unit* pAttacker = SelectAttackerDifferentFrom(me->GetVictim());
             if (pAttacker && pAttacker->GetCreatureType() == CREATURE_TYPE_UNDEAD &&
