@@ -423,7 +423,7 @@ Unit* PartyBotAI::SelectPartyAttackTarget() const
         if (Player* pMember = itr->getSource())
         {
             // We already checked self.
-            if (pMember == me || pMember->GetClass() == CLASS_WARRIOR && pMember == pLeader)
+            if (pMember == me || pMember->GetClass() == CLASS_WARRIOR && pMember == pLeader || pMember->GetClass() == CLASS_ROGUE)
                 continue;
 
             for (const auto pAttacker : pMember->GetAttackers())
@@ -481,6 +481,26 @@ Player* PartyBotAI::GetWarlock() const
 			
 			if (pWarlock->GetClass() == CLASS_WARLOCK)
 				return pWarlock;
+		}	
+	}
+	return nullptr;
+}
+
+Player* PartyBotAI::GetRogue() const
+{
+	if (IsInDuel())
+        return nullptr;
+
+    Group* pGroup = me->GetGroup();
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        if (Player* pRogue = itr->getSource())	
+		{
+			if (pRogue->GetClass() != CLASS_ROGUE)
+                continue;
+			
+			if (pRogue->GetClass() == CLASS_ROGUE)
+				return pRogue;
 		}	
 	}
 	return nullptr;
@@ -1000,6 +1020,7 @@ void PartyBotAI::UpdateInCombatAI()
     if (!IsInDuel())
     {
         Player* pLeader = GetPartyLeader();
+    	Player* pRogue = GetRogue();
         Unit* pVictim = me->GetVictim();
         if (m_role == ROLE_TANK)
         {
@@ -1012,7 +1033,7 @@ void PartyBotAI::UpdateInCombatAI()
             }
 
             // Defend party members.
-            if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR)
+            if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR || pVictim->GetVictim() == pRogue && pRogue->HasAura(33393))
             {
                 if (pVictim = SelectPartyAttackTarget())
                 {
