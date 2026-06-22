@@ -1222,7 +1222,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
         }
 
         if (m_spells.paladin.pTurnEvil &&
-            (m_role != ROLE_TANK || m_role != ROLE_NO_DISPEL_TANK))
+            (m_role != ROLE_TANK && m_role != ROLE_NO_DISPEL_TANK))
         {
             Unit* pAttacker = SelectAttackerDifferentFrom(me->GetVictim());
             if (pAttacker && pAttacker->GetCreatureType() == CREATURE_TYPE_UNDEAD &&
