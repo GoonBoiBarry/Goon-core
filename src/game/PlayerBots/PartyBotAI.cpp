@@ -1168,7 +1168,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
 {
     if (m_spells.paladin.pDivineShield &&
        (me->GetHealthPercent() < 20.0f) &&
-       (m_role != ROLE_TANK || m_role != ROLE_NO_DISPEL_TANK) &&
+       (m_role != ROLE_TANK && m_role != ROLE_NO_DISPEL_TANK) &&
         CanTryToCastSpell(me, m_spells.paladin.pDivineShield))
     {
         if (DoCastSpell(me, m_spells.paladin.pDivineShield) == SPELL_CAST_OK)
@@ -1608,8 +1608,11 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
         if (m_spells.hunter.pAimedShot &&
             CanTryToCastSpell(pVictim, m_spells.hunter.pAimedShot))
         {
-            if (DoCastSpell(pVictim, m_spells.hunter.pAimedShot) == SPELL_CAST_OK)
-                return;
+            if ((pVictim->GetHealth() > me->GetMaxHealth() / 2))
+			{
+                if (DoCastSpell(pVictim, m_spells.hunter.pAimedShot) == SPELL_CAST_OK)
+                    return;
+            }
         }
         
         if (m_spells.hunter.pRapidFire &&
@@ -2339,7 +2342,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (m_spells.priest.pShadowWordPain &&
             CanTryToCastSpell(pVictim, m_spells.priest.pShadowWordPain))
         {
-			if ((pVictim->GetHealth() > me->GetMaxHealth() / 5))
+			if ((pVictim->GetHealth() > me->GetMaxHealth() / 2))
 			{
 				if (DoCastSpell(pVictim, m_spells.priest.pShadowWordPain) == SPELL_CAST_OK)
 					return;
@@ -2349,7 +2352,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (m_spells.priest.pVampiricEmbrace &&
             CanTryToCastSpell(pVictim, m_spells.priest.pVampiricEmbrace))
         {
-			if ((pVictim->GetHealth() > me->GetMaxHealth() / 4))
+			if ((pVictim->GetHealth() > me->GetMaxHealth()))
 			{
 				if (DoCastSpell(pVictim, m_spells.priest.pVampiricEmbrace) == SPELL_CAST_OK)
 					return;
@@ -2366,7 +2369,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (m_spells.priest.pDevouringPlague &&
             CanTryToCastSpell(pVictim, m_spells.priest.pDevouringPlague))
         {
-			if ((pVictim->GetHealth() > me->GetMaxHealth() / 4))
+			if ((pVictim->GetHealth() > me->GetMaxHealth()))
 			{
 				if (DoCastSpell(pVictim, m_spells.priest.pDevouringPlague) == SPELL_CAST_OK)
 					return;
