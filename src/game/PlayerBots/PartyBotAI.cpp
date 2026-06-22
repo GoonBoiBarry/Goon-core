@@ -1031,17 +1031,27 @@ void PartyBotAI::UpdateInCombatAI()
                 AttackStart(pVictim);
                 return;              
             }
-
-            // Defend party members.
-            if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR || (pVictim->GetVictim() == pRogue && pRogue->HasAura(33393)))
+            
+            if (pRogue != nullptr)
             {
-                if (pVictim = SelectPartyAttackTarget())
+            // Defend party members.
+                if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR || pVictim->GetVictim() == pRogue && pRogue->HasAura(33393))
                 {
-                    me->AttackStop(true);
-                    AttackStart(pVictim);
+                    if (pVictim = SelectPartyAttackTarget())
+                    {
+                        me->AttackStop(true);
+                        AttackStart(pVictim);
+                    }
                 }
-            }
-
+            } 
+            else if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR) 
+            {
+                    if (pVictim = SelectPartyAttackTarget())
+                    {
+                        me->AttackStop(true);
+                        AttackStart(pVictim);
+                    }
+             }        
             // Taunt target if its attacking someone else.
             if (pVictim && pVictim->GetVictim() != me)
             {
