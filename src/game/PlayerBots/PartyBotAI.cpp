@@ -1033,7 +1033,7 @@ void PartyBotAI::UpdateInCombatAI()
             }
 
             // Defend party members.
-            if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR || pVictim->GetVictim() == pRogue && pRogue->HasAura(33393))
+            if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR || (pVictim->GetVictim() == pRogue && pRogue->HasAura(33393)))
             {
                 if (pVictim = SelectPartyAttackTarget())
                 {
