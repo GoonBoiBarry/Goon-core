@@ -3004,6 +3004,8 @@ void Unit::_UpdateAutoRepeatSpell()
 
         // all went good, reset attack
         ResetAttackTimer(RANGED_ATTACK);
+    	if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
+	        resetAttackTimer(BASE_ATTACK);            
         SetStandState(UNIT_STAND_STATE_STAND);
     }
 }
