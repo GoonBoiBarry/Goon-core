@@ -359,7 +359,7 @@ Unit* PartyBotAI::GetMarkedTarget(RaidTargetIcon mark) const
     return nullptr;
 }
 
-Unit* PartyBotAI::kTarget(Player* pLeader) const
+Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
 {
     if (IsInDuel())
     {
@@ -884,7 +884,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
             if (pVictim)
                 me->AttackStop();
 
-            if (Unit* pVictim = SelectAttackTarget(pLeader) && pVictim->IsInCombat())
+            if ((Unit* pVictim = SelectAttackTarget(pLeader)) && pVictim->IsInCombat())
             {
                 AttackStart(pVictim);
                 return;
@@ -1418,7 +1418,7 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
 	}
     
     if (m_spells.shaman.pManaTideTotem &&
-       (me->GetPowerPercent(POWER_MANA) < 70.0f) &&
+       (me->GetPowerPercent(POWER_MANA) < 45.0f) &&
         CanTryToCastSpell(me, m_spells.shaman.pManaTideTotem) && GetRole() != ROLE_NO_TOTEMS)
     {
         if (DoCastSpell(me, m_spells.shaman.pManaTideTotem) == SPELL_CAST_OK)
