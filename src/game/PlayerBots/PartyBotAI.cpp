@@ -884,10 +884,13 @@ void PartyBotAI::UpdateAI(uint32 const diff)
             if (pVictim)
                 me->AttackStop();
 
-            if ((Unit* pVictim = SelectAttackTarget(pLeader)) && pVictim->IsInCombat())
+            if (Unit* pVictim = SelectAttackTarget(pLeader))
             {
-                AttackStart(pVictim);
-                return;
+                if (pVictim->IsInCombat())
+                {
+                    AttackStart(pVictim);
+                    return;
+                }
             }
         }
     }
