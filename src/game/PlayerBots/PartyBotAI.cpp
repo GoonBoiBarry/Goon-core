@@ -359,7 +359,7 @@ Unit* PartyBotAI::GetMarkedTarget(RaidTargetIcon mark) const
     return nullptr;
 }
 
-Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
+Unit* PartyBotAI::kTarget(Player* pLeader) const
 {
     if (IsInDuel())
     {
@@ -884,7 +884,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
             if (pVictim)
                 me->AttackStop();
 
-            if (Unit* pVictim = SelectAttackTarget(pLeader))
+            if (Unit* pVictim = SelectAttackTarget(pLeader) && pVictim->IsInCombat())
             {
                 AttackStart(pVictim);
                 return;
