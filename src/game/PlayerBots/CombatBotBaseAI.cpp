@@ -3082,10 +3082,12 @@ void CombatBotBaseAI::BeginChasing(Unit* pVictim) const
 {
      if (GetRole() == ROLE_RANGE_DPS || GetRole() == ROLE_NO_DISPEL_DPS || GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS)
 	{
-		if (me->GetClass() != CLASS_PRIEST)
-			me->SetCasterChaseDistance(30.0f);
-		else
-			me->SetCasterChaseDistance(28.0f);
+		if (me->GetClass() == CLASS_PRIEST)
+			me->SetCasterChaseDistance(26.0f);
+		else if (me->GetClass() == CLASS_HUNTER)
+			me->SetCasterChaseDistance(40.0f);
+        else
+            me->SetCasterChaseDistance(30.0f);
 	}
     else if (me->HasDistanceCasterMovement())
         me->SetCasterChaseDistance(0.0f);
