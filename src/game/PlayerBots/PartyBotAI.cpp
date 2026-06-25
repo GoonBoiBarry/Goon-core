@@ -1581,7 +1581,11 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
     if (Unit* pVictim = me->GetVictim())
     {
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
-            && me->GetDistance(pVictim) > 30.0f)
+            && me->GetDistance(pVictim) > 40.0f && me->HasAura(33393))
+        {
+            BeginChasing(pVictim);
+        } else if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
+            && me->GetDistance(pVictim) > 30.0f && !me->HasAura(33393))
         {
             BeginChasing(pVictim);
         }
