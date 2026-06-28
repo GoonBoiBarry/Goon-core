@@ -2429,7 +2429,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         }
 
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
-            && me->GetDistance(pVictim) > 30.0f)
+            && me->GetDistance(pVictim) > 26.0f)
         {
             BeginChasing(pVictim);
         }
