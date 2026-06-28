@@ -163,6 +163,7 @@ void CombatBotBaseAI::PopulateSpellData()
     SpellEntry const* pWindfuryTotem = nullptr;
     SpellEntry const* pWindwallTotem = nullptr;
     SpellEntry const* pTranquilAirTotem = nullptr;
+    SpellEntry const* pGroundingTotem = nullptr;   
 
     // Earth Totems
     SpellEntry const* pEarthbindTotem = nullptr;
@@ -502,6 +503,11 @@ void CombatBotBaseAI::PopulateSpellData()
                 {
                     if (IsHigherRankSpell(pTranquilAirTotem))
                         pTranquilAirTotem = pSpellEntry;
+                }
+                    else if (pSpellEntry->SpellName[0].find("Grounding Totem") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(pGroundingTotem))
+                        pGroundingTotem = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Earthbind Totem") != std::string::npos)
                 {
