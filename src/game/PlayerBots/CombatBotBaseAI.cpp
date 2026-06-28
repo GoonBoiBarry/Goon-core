@@ -1759,6 +1759,8 @@ void CombatBotBaseAI::PopulateSpellData()
                 airTotems.push_back(pWindwallTotem);
             if (pTranquilAirTotem)
                 airTotems.push_back(pTranquilAirTotem);
+            if (pGroundingTotem)
+                airTotems.push_back(pGroundingTotem);
             if (!airTotems.empty())
                 m_spells.shaman.pAirTotem = SelectRandomContainerElement(airTotems);
 
