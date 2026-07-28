@@ -5208,89 +5208,13 @@ uint32 Player::GetShieldBlockValue() const
 
 float Player::GetMeleeCritFromAgility() const
 {
-    float valLevel1 = 0.0f;
-    float valLevel60 = 0.0f;
-    // critical
-    switch (GetClass())
-    {
-        case CLASS_PALADIN:
-        case CLASS_SHAMAN:
-        case CLASS_DRUID:
-            valLevel1 = 4.6f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_MAGE:
-            valLevel1 = 12.9f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_ROGUE:
-            valLevel1 = 2.2f;
-            valLevel60 = 29.0f;
-            break;
-        case CLASS_HUNTER:
-            valLevel1 = 3.5f;
-            valLevel60 = 53.0f;
-            break;
-        case CLASS_PRIEST:
-            valLevel1 = 11.0f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_WARLOCK:
-            valLevel1 = 8.4f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_WARRIOR:
-            valLevel1 = 3.9f;
-            valLevel60 = 20.0f;
-            break;
-        default:
-            return 0.0f;
-    }
-    float classRate = valLevel1 * float(60.0f - GetLevel()) / 59.0f + valLevel60 * float(GetLevel() - 1.0f) / 59.0f;
+    float classRate = sObjectMgr.GetPlayerCritPerAgility(GetClass(), GetLevel());
     return GetStat(STAT_AGILITY) / classRate;
 }
 
 float Player::GetDodgeFromAgility() const
 {
-    float valLevel1 = 0.0f;
-    float valLevel60 = 0.0f;
-    // critical
-    switch (GetClass())
-    {
-        case CLASS_PALADIN:
-        case CLASS_SHAMAN:
-        case CLASS_DRUID:
-            valLevel1 = 4.6f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_MAGE:
-            valLevel1 = 12.9f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_ROGUE:
-            valLevel1 = 1.1f;
-            valLevel60 = 14.5f;
-            break;
-        case CLASS_HUNTER:
-            valLevel1 = 1.8f;
-            valLevel60 = 26.5f;
-            break;
-        case CLASS_PRIEST:
-            valLevel1 = 11.0f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_WARLOCK:
-            valLevel1 = 8.4f;
-            valLevel60 = 20.0f;
-            break;
-        case CLASS_WARRIOR:
-            valLevel1 = 3.9f;
-            valLevel60 = 20.0f;
-            break;
-        default:
-            return 0.0f;
-    }
-    float classRate = valLevel1 * float(60.0f - GetLevel()) / 59.0f + valLevel60 * float(GetLevel() - 1.0f) / 59.0f;
+    float classRate = sObjectMgr.GetPlayerDodgePerAgility(GetClass(), GetLevel());
     return GetStat(STAT_AGILITY) / classRate;
 }
 
@@ -16148,8 +16072,11 @@ void Player::SendRaidInfo() const
             data << uint32(state->GetMapId());              // map id
 
             // Permanent dungeons (raids) don't have a valid reset timer since it's
-            // on a schedule. Send the scheduled time instead of state reset time
-            time_t resetTime = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(state->GetMapId());
+            // on a schedule. Send the scheduled time instead of state reset time.
+            // Before 1.9 each raid instance has its own reset timer instead.
+            time_t resetTime = DungeonResetScheduler::IsRaidResetSchedulingGlobal()
+                ? sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(state->GetMapId())
+                : state->GetResetTime();
             data << uint32(resetTime - time(nullptr));
             data << uint32(state->GetInstanceId());         // instance id
 
@@ -18478,6 +18405,42 @@ void Player::InitDataForForm(bool reapplyMods)
     UpdateAttackPowerAndDamage(true);
 }
 
+bool Player::IsVendorItemVisible(Creature* vendor, VendorItem const* vendorItem, ItemPrototype const* itemProto)
+{
+    if (!vendor || !vendorItem || !itemProto)
+        return false;
+
+    if (IsGameMaster())
+        return true;
+
+    // class wrong item skip only for bindable case
+    if ((itemProto->AllowableClass & GetClassMask()) == 0 && itemProto->Bonding == BIND_WHEN_PICKED_UP)
+        return false;
+
+    // race wrong item skip always
+    if ((itemProto->AllowableRace & GetRaceMask()) == 0)
+        return false;
+
+    // when no faction required but rank > 0 will be used faction id from the vendor faction template to compare the rank
+    if (!itemProto->RequiredReputationFaction && itemProto->RequiredReputationRank > 0 &&
+        ReputationRank(itemProto->RequiredReputationRank) > GetReputationRank(vendor->GetFactionId()))
+        return false;
+
+    // World of Warcraft Client Patch 1.7.0 (2005-09-13)
+    // - Argent Dawn, Timbermaw, Zandalar and Arathi Basin vendors now show
+    //   you their entire inventory regardless of current reputation, allowing
+    //   players to peruse their full range of wares.The items in question
+    //   now require the appropriate reputation level to make use of them.
+#if SUPPORTED_CLIENT_BUILD <= CLIENT_BUILD_1_6_1
+    if (itemProto->RequiredReputationFaction && itemProto->RequiredReputationRank > 0 &&
+        ReputationRank(itemProto->RequiredReputationRank) > GetReputationRank(itemProto->RequiredReputationFaction))
+        return false;
+#endif
+
+    return !vendorItem->conditionId ||
+        IsConditionSatisfied(vendorItem->conditionId, this, vendor->GetMap(), vendor, CONDITION_FROM_VENDOR);
+}
+
 // Return true is the bought item has a max count to force refresh of window by caller
 bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot)
 {
@@ -18529,7 +18492,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     }
 
     VendorItem const* crItem = vendorslot < vCount ? vItems->GetItem(vendorslot) : tItems->GetItem(vendorslot - vCount);
-    if (!crItem || crItem->item != item)                    // store diff item (cheating)
+    if (!crItem || crItem->item != item || !IsVendorItemVisible(pCreature, crItem, pProto))
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
         return false;
@@ -18567,12 +18530,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         return false;
     }
 
-    if (crItem->conditionId && !IsGameMaster() && !IsConditionSatisfied(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
-    {
-        SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
-        return false;
-    }
-
+    // Visibility, including vendor conditions, was validated above.
     uint32 price  = pProto->BuyPrice * count;
 
     // reputation discount
@@ -18634,9 +18592,20 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
 
     uint32 new_count = pCreature->UpdateVendorItemCurrentCount(crItem, totalCount);
 
+    // SMSG_LIST_INVENTORY numbers only visible rows. Report that same
+    // compact slot so the client updates the item it just purchased.
+    uint32 clientVendorSlot = 0;
+    for (size_t i = 0; i <= vendorslot; ++i)
+    {
+        VendorItem const* listedItem = i < vCount ? vItems->GetItem(i) : tItems->GetItem(i - vCount);
+        ItemPrototype const* listedProto = listedItem ? sObjectMgr.GetItemPrototype(listedItem->item) : nullptr;
+        if (IsVendorItemVisible(pCreature, listedItem, listedProto))
+            ++clientVendorSlot;
+    }
+
     auto packet = std::make_unique<WorldPackets::Item::BuyItemResponse>();
     packet->vendorGuid = pCreature->GetObjectGuid();
-    packet->vendorSlot = vendorslot + 1;
+    packet->vendorSlot = clientVendorSlot;
     packet->newCount = crItem->maxcount > 0 ? new_count : 0xFFFFFFFF;
     packet->purchaseCount = count;
     GetSession()->SendPacket(std::move(packet));
