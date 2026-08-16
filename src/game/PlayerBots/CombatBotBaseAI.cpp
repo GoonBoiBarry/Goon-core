@@ -281,6 +281,11 @@ void CombatBotBaseAI::PopulateSpellData()
                     if (IsHigherRankSpell(pBlessingOfSanctuary))
                         pBlessingOfSanctuary = pSpellEntry;
                 }
+                else if (pSpellEntry->SpellName[0].find("Greater Blessing of Kings") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(pGreaterBlessingOfKings))
+                        pGreaterBlessingOfKings = pSpellEntry;
+                }
                 else if (pSpellEntry->SpellName[0].find("Blessing of Kings") != std::string::npos)
                 {
                     if (IsHigherRankSpell(pBlessingOfKings))
@@ -300,11 +305,6 @@ void CombatBotBaseAI::PopulateSpellData()
                 {
                     if (IsHigherRankSpell(pBlessingOfLight))
                         pBlessingOfLight = pSpellEntry;
-                }
-                else if (pSpellEntry->SpellName[0].find("Greater Blessing of Kings") != std::string::npos)
-                {
-                    if (IsHigherRankSpell(pGreaterBlessingOfKings))
-                        pGreaterBlessingOfKings = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Devotion Aura") != std::string::npos)
                 {
