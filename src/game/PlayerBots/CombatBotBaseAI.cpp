@@ -147,6 +147,7 @@ void CombatBotBaseAI::PopulateSpellData()
     SpellEntry const* pBlessingOfWisdom = nullptr;
     SpellEntry const* pBlessingOfKings = nullptr;
     SpellEntry const* pBlessingOfSanctuary = nullptr;
+    SpellEntry const* pGreaterBlessingOfKings = nullptr;
 
     // Paladin Auras
     SpellEntry const* pDevotionAura = nullptr;
@@ -299,6 +300,11 @@ void CombatBotBaseAI::PopulateSpellData()
                 {
                     if (IsHigherRankSpell(pBlessingOfLight))
                         pBlessingOfLight = pSpellEntry;
+                }
+                else if (pSpellEntry->SpellName[0].find("Greater Blessing of Kings") != std::string::npos)
+                {
+                    if (IsHigherRankSpell(pGreaterBlessingOfKings))
+                        pGreaterBlessingOfKings = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Devotion Aura") != std::string::npos)
                 {
@@ -1703,19 +1709,19 @@ void CombatBotBaseAI::PopulateSpellData()
             else
                 m_spells.paladin.pSeal = pSealOfRighteousness;
 
-            if (pBlessingOfKings)
-                m_spells.paladin.pBlessingBuff = pBlessingOfKings;
+            if (pGreaterBlessingOfKings)
+                m_spells.paladin.pBlessingBuff = pGreaterBlessingOfKings;
             else
             {
                 std::vector<SpellEntry const*> blessings;
+                if (pBlessingOfKings)
+                    blessings.push_back(pBlessingOfKings);
                 if (pBlessingOfLight)
                     blessings.push_back(pBlessingOfLight);
                 if (pBlessingOfMight)
                     blessings.push_back(pBlessingOfMight);
                 if (pBlessingOfWisdom)
                     blessings.push_back(pBlessingOfWisdom);
-                if (pBlessingOfKings)
-                    blessings.push_back(pBlessingOfKings);
                 if (pBlessingOfSanctuary)
                     blessings.push_back(pBlessingOfSanctuary);
                 if (!blessings.empty())
