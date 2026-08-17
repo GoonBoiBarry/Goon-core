@@ -147,7 +147,6 @@ void CombatBotBaseAI::PopulateSpellData()
     SpellEntry const* pBlessingOfWisdom = nullptr;
     SpellEntry const* pBlessingOfKings = nullptr;
     SpellEntry const* pBlessingOfSanctuary = nullptr;
-    SpellEntry const* pGreaterBlessingOfKings = nullptr;
 
     // Paladin Auras
     SpellEntry const* pDevotionAura = nullptr;
@@ -280,11 +279,6 @@ void CombatBotBaseAI::PopulateSpellData()
                 {
                     if (IsHigherRankSpell(pBlessingOfSanctuary))
                         pBlessingOfSanctuary = pSpellEntry;
-                }
-                else if (pSpellEntry->SpellName[0].find("Greater Blessing of Kings") != std::string::npos)
-                {
-                    if (IsHigherRankSpell(pGreaterBlessingOfKings))
-                        pGreaterBlessingOfKings = pSpellEntry;
                 }
                 else if (pSpellEntry->SpellName[0].find("Blessing of Kings") != std::string::npos)
                 {
@@ -1709,8 +1703,8 @@ void CombatBotBaseAI::PopulateSpellData()
             else
                 m_spells.paladin.pSeal = pSealOfRighteousness;
 
-            if (pGreaterBlessingOfKings)
-                m_spells.paladin.pBlessingBuff = pGreaterBlessingOfKings;
+            if (pBlessingOfKings)
+                m_spells.paladin.pBlessingBuff = pBlessingOfKings;
             else
             {
                 std::vector<SpellEntry const*> blessings;
