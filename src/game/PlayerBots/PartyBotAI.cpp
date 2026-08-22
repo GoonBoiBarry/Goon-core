@@ -423,7 +423,7 @@ Unit* PartyBotAI::SelectPartyAttackTarget() const
         if (Player* pMember = itr->getSource())
         {
             // We already checked self.
-            if (pMember == me || pMember->GetClass() == CLASS_WARRIOR && pMember == pLeader)
+            if (pMember == me || pMember->GetClass() == CLASS_WARRIOR && pMember == pLeader || pMember->GetClass() == CLASS_ROGUE && pMember->HasAura(33393))
                 continue;
 
             for (const auto pAttacker : pMember->GetAttackers())
