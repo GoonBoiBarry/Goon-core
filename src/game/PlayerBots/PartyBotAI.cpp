@@ -1217,7 +1217,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                 return;
         }
         if (m_spells.paladin.pLayOnHands &&
-           (pFriend->GetHealthPercent() < 15.0f) &&
+           (pFriend->GetHealthPercent() < 20.0f) &&
             CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
         {
             if (DoCastSpell(pFriend, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
