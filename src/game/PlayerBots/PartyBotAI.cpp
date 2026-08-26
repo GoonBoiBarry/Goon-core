@@ -1200,7 +1200,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
             return;
     }
 
-    if (Unit* pFriend = me->FindLowestHpFriendlyUnit(30.0f, 70, true, me))
+    if (Unit* pFriend = me->FindLowestHpFriendlyUnit(35.0f, 70, true, me))
     {
         if (m_spells.paladin.pBlessingOfProtection &&
            !IsPhysicalDamageClass(pFriend->GetClass()) &&
@@ -1217,7 +1217,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                 return;
         }
         if (m_spells.paladin.pLayOnHands &&
-           (pFriend->GetHealthPercent() < 25.0f) &&
+           (pFriend->GetHealthPercent() < 30.0f) &&
             CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
         {
             if (DoCastSpell(pFriend, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
@@ -1284,7 +1284,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
     else
     {
         if (m_spells.paladin.pLayOnHands &&
-           (me->GetHealthPercent() < 15.0f) &&
+           (me->GetHealthPercent() < 20.0f) &&
             CanTryToCastSpell(me, m_spells.paladin.pLayOnHands))
         {
             if (DoCastSpell(me, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
@@ -3167,7 +3167,7 @@ void PartyBotAI::UpdateInCombatAI_Rogue()
         if (!me->HasAuraType(SPELL_AURA_MOD_STEALTH))
         {
             if (m_spells.rogue.pEvasion &&
-               (me->GetHealthPercent() < 50.0f) &&
+               (me->GetHealthPercent() < 70.0f) &&
                ((GetAttackersInRangeCount(10.0f) > 0) || !IsRangedDamageClass(pVictim->GetClass())) &&
                 CanTryToCastSpell(me, m_spells.rogue.pEvasion))
             {
