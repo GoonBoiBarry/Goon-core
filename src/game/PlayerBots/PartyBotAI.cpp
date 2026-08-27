@@ -1340,6 +1340,12 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
             {
                 BeginChasing(pVictim);
             }
+            if (me->HasAura(33393) && me->GetPower(POWER_MANA) < 550 &&
+                CanTryToCastSpell(me, m_spells.paladin.pLayOnHands))
+            {
+                if (DoCastSpell(me, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
+                    return;
+            }
         }
     }
 }
