@@ -1200,7 +1200,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
             return;
     }
 
-    if (Unit* pFriend = me->FindLowestHpFriendlyUnit(35.0f, 70, true, me))
+    if (Unit* pFriend = me->FindLowestHpFriendlyUnit(35.0f, 70, true, me) && !me->HasAura(33393))
     {
         if (m_spells.paladin.pBlessingOfProtection &&
            !IsPhysicalDamageClass(pFriend->GetClass()) &&
@@ -1216,6 +1216,17 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
             if (DoCastSpell(pFriend, m_spells.paladin.pBlessingOfSacrifice) == SPELL_CAST_OK)
                 return;
         }
+        if (m_spells.paladin.pLayOnHands &&
+           (pFriend->GetHealthPercent() < 30.0f) &&
+            CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
+        {
+            if (DoCastSpell(pFriend, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
+                return;
+        }
+    }
+
+    if (Unit* pFriend = me->FindLowestHpFriendlyUnit(38.0f) && me->HasAura(33393))
+    {
         if (m_spells.paladin.pLayOnHands &&
            (pFriend->GetHealthPercent() < 30.0f) &&
             CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
