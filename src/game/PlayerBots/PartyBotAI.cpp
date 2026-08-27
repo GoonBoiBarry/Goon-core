@@ -1200,41 +1200,43 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
             return;
     }
 
-    if (Unit* pFriend = me->FindLowestHpFriendlyUnit(30.0f, 70, true, me) && !me->HasAura(33393))
-    {
-        if (m_spells.paladin.pBlessingOfProtection &&
-           !IsPhysicalDamageClass(pFriend->GetClass()) &&
-            CanTryToCastSpell(pFriend, m_spells.paladin.pBlessingOfProtection))
+    if (!me->HasAura(33393))
+        if (Unit* pFriend = me->FindLowestHpFriendlyUnit(30.0f, 70, true, me))
         {
-            if (DoCastSpell(pFriend, m_spells.paladin.pBlessingOfProtection) == SPELL_CAST_OK)
+            if (m_spells.paladin.pBlessingOfProtection &&
+               !IsPhysicalDamageClass(pFriend->GetClass()) &&
+                CanTryToCastSpell(pFriend, m_spells.paladin.pBlessingOfProtection))
+            {
+                if (DoCastSpell(pFriend, m_spells.paladin.pBlessingOfProtection) == SPELL_CAST_OK)
                 return;
+            }
+            if (m_spells.paladin.pBlessingOfSacrifice &&
+               (me->GetHealthPercent() > 80.0f) &&
+                CanTryToCastSpell(pFriend, m_spells.paladin.pBlessingOfSacrifice))
+            {
+                if (DoCastSpell(pFriend, m_spells.paladin.pBlessingOfSacrifice) == SPELL_CAST_OK)
+                    return;
+            }
+            if (m_spells.paladin.pLayOnHands &&
+               (pFriend->GetHealthPercent() < 30.0f) &&
+                CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
+            {
+                if (DoCastSpell(pFriend, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
+                    return;
+            }
         }
-        if (m_spells.paladin.pBlessingOfSacrifice &&
-           (me->GetHealthPercent() > 80.0f) &&
-            CanTryToCastSpell(pFriend, m_spells.paladin.pBlessingOfSacrifice))
-        {
-            if (DoCastSpell(pFriend, m_spells.paladin.pBlessingOfSacrifice) == SPELL_CAST_OK)
-                return;
-        }
-        if (m_spells.paladin.pLayOnHands &&
-           (pFriend->GetHealthPercent() < 30.0f) &&
-            CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
-        {
-            if (DoCastSpell(pFriend, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
-                return;
-        }
-    }
 
-    if (Unit* pFriend = me->FindLowestHpFriendlyUnit(40.0f) && me->HasAura(33393))
-    {
-        if (m_spells.paladin.pLayOnHands &&
-           (pFriend->GetHealthPercent() < 30.0f) &&
-            CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
+    if (me->HasAura(33393))
+        if (Unit* pFriend = me->FindLowestHpFriendlyUnit(40.0f))
         {
-            if (DoCastSpell(pFriend, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
-                return;
+            if (m_spells.paladin.pLayOnHands &&
+               (pFriend->GetHealthPercent() < 30.0f) &&
+                CanTryToCastSpell(pFriend, m_spells.paladin.pLayOnHands))
+            {
+                if (DoCastSpell(pFriend, m_spells.paladin.pLayOnHands) == SPELL_CAST_OK)
+                    return;
+            }
         }
-    }
     
     if (m_spells.paladin.pCleanse && m_role != ROLE_NO_DISPEL_TANK)
     {
