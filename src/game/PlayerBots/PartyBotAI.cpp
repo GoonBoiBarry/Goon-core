@@ -1228,7 +1228,14 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
             if (DoCastSpell(me, m_spells.paladin.pHolyShield) == SPELL_CAST_OK)
                 return;
         }
-
+        
+        if (m_spells.paladin.pConsecration &&
+            CanTryToCastSpell(me, m_spells.paladin.pConsecration))
+        {
+            if (DoCastSpell(me, m_spells.paladin.pConsecration) == SPELL_CAST_OK)
+                return;
+        }
+        
         if (m_spells.paladin.pTurnEvil &&
             (m_role != ROLE_TANK && m_role != ROLE_NO_DISPEL_TANK))
         {
@@ -1268,9 +1275,8 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
     {
         bool const hasSeal = m_spells.paladin.pSeal && me->HasAura(m_spells.paladin.pSeal->Id);
 
-        if (!hasSeal &&
-            m_spells.paladin.pSeal &&
-            CanTryToCastSpell(me, m_spells.paladin.pSeal))
+        if (!hasSeal && (me->GetPower(POWER_MANA) > 565.0f)
+            m_spells.paladin.pSeal && CanTryToCastSpell(me, m_spells.paladin.pSeal))
         {
             me->CastSpell(me, m_spells.paladin.pSeal, false);
         }
@@ -1278,7 +1284,6 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
         if (Unit* pVictim = me->GetVictim())
         {
             if (hasSeal && m_spells.paladin.pJudgement &&
-               (me->GetPowerPercent(POWER_MANA) > 5.0f) &&
                 CanTryToCastSpell(pVictim, m_spells.paladin.pJudgement))
             {
                 if (DoCastSpell(pVictim, m_spells.paladin.pJudgement) == SPELL_CAST_OK)
@@ -1409,7 +1414,7 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
 {
     if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS))
     {
-        if (FindAndHealInjuredAlly(50.0f, 50.0f))
+        if (FindAndHealInjuredAlly(60.0f, 60.0f))
             return;
 	}
     
@@ -1519,13 +1524,13 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
 
     if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS))
     {
-        if (FindAndHealInjuredAlly(65.0f, 85.0f))
+        if (FindAndHealInjuredAlly(70.0f, 85.0f))
             return;
 
         if (FindAndPreHealTarget())
             return;
     }
-    else if (me->GetHealthPercent() < 65.0f)
+    else if (me->GetHealthPercent() < 60.0f)
         HealInjuredTarget(me);
 }
 
@@ -3299,7 +3304,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Druid()
 
     if (m_spells.druid.pThorns)
     {
-        if (Player* pTarget = SelectBuffTarget(m_spells.druid.pThorns))
+        if (Player* pTarget = SelectBuffTarget(m_spells.druid.pThorns) && !IsRangedDamageClass(pTarget->GetClass())
         {
             if (CanTryToCastSpell(pTarget, m_spells.druid.pThorns))
             {
