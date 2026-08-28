@@ -1275,7 +1275,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
     {
         bool const hasSeal = m_spells.paladin.pSeal && me->HasAura(m_spells.paladin.pSeal->Id);
 
-        if (!hasSeal && (me->GetPower(POWER_MANA) > 565.0f)
+        if (!hasSeal && (me->GetPower(POWER_MANA) > 565.0f) &&
             m_spells.paladin.pSeal && CanTryToCastSpell(me, m_spells.paladin.pSeal))
         {
             me->CastSpell(me, m_spells.paladin.pSeal, false);
