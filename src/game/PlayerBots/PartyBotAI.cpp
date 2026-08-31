@@ -3306,7 +3306,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Druid()
     {
         if (Player* pTarget = SelectBuffTarget(m_spells.druid.pThorns))
         {
-            if (!IsRangedDamageClass(pTarget->GetClass()))
+            if (IsPhysicalDamageClass(pTarget->GetClass() && pTarget->GetClass() != CLASS_SHAMAN))
             {
                 if (CanTryToCastSpell(pTarget, m_spells.druid.pThorns))
                 {
