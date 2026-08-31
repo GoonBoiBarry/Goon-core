@@ -3306,18 +3306,15 @@ void PartyBotAI::UpdateOutOfCombatAI_Druid()
     {
         if (Player* pTarget = SelectBuffTarget(m_spells.druid.pThorns))
         {
-            if (pTarget->GetClass() == CLASS_WARRIOR || pTarget->GetClass() == CLASS_DRUID)
+            if (CanTryToCastSpell(pTarget, m_spells.druid.pThorns))
             {
-                if (CanTryToCastSpell(pTarget, m_spells.druid.pThorns))
+                if (DoCastSpell(pTarget, m_spells.druid.pThorns) == SPELL_CAST_OK)
                 {
-                    if (DoCastSpell(pTarget, m_spells.druid.pThorns) == SPELL_CAST_OK)
-                    {
-                        m_isBuffing = true;
-                        me->ClearTarget();
-                        return;
-                    }
+                    m_isBuffing = true;
+                    me->ClearTarget();
+                    return;
                 }
-            }
+            }           
         }
     }
     
