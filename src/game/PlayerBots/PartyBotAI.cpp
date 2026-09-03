@@ -1598,7 +1598,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
 
         if (me->HasSpell(PB_SPELL_AUTO_SHOT) &&
             !me->IsMoving() &&
-            (me->GetCombatDistance(pVictim) > 9.0f) &&
+            (me->GetCombatDistance(pVictim) > 11.0f) &&
             !me->IsNonMeleeSpellCasted())
         {
             switch (me->CastSpell(pVictim, PB_SPELL_AUTO_SHOT, false))
