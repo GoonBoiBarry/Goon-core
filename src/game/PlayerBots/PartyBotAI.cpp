@@ -1373,7 +1373,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Shaman()
     {
         if (Unit* pFriend = SelectDispelTarget(m_spells.shaman.pCurePoison))
         {
-            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCurePoison))
+            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCurePoison) && !pFriend->HasAura(24321))
             {
                 if (DoCastSpell(pFriend, m_spells.shaman.pCurePoison) == SPELL_CAST_OK)
                     return;
@@ -1514,7 +1514,7 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
     {
         if (Unit* pFriend = SelectDispelTarget(m_spells.shaman.pCurePoison))
         {
-            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCurePoison))
+            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCurePoison) && !pFriend->HasAura(24321))
             {
                 if (DoCastSpell(pFriend, m_spells.shaman.pCurePoison) == SPELL_CAST_OK)
                     return;
@@ -2244,6 +2244,14 @@ void PartyBotAI::UpdateInCombatAI_Priest()
     if (!me->GetAttackers().empty() &&
         m_role != ROLE_TANK)
     {
+        if (m_spells.priest.pPsychicScream &&
+            GetAttackersInRangeCount(10.0f) &&
+            CanTryToCastSpell(me, m_spells.priest.pPsychicScream))
+        {
+            if (DoCastSpell(me, m_spells.priest.pPsychicScream) == SPELL_CAST_OK)
+                return;
+        }
+        
         if (m_spells.priest.pFade &&
             CanTryToCastSpell(me, m_spells.priest.pFade))
         {
