@@ -187,7 +187,7 @@ bool PartyBotAI::DrinkAndEat()
     if (m_isBuffing)
         return false;
 
-    if (me->IsMounted())
+    if (me->IsMounted() || me->HasAura(783))
         return false;
 
     if (me->GetVictim())
@@ -340,6 +340,9 @@ bool PartyBotAI::AttackStart(Unit* pVictim)
 
     if (me->IsMounted())
         me->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+    if (me->HasAura(783))
+        me->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
     if (me->Attack(pVictim, true))
     {
@@ -841,6 +844,8 @@ void PartyBotAI::UpdateAI(uint32 const diff)
             }
             else if (me->IsMounted())
                 me->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+            else if (me->HasAura(783))
+                me->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
             return;
         }
 
@@ -864,7 +869,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
     if (me->GetSheath() == SHEATH_STATE_UNARMED && !me->IsMounted())
         me->SetSheath(SHEATH_STATE_MELEE);
 
-    if (!me->IsInCombat() && !me->IsMounted())
+    if (!me->IsInCombat() && !me->IsMounted() && !me->HasAura(783))
     {
         UpdateOutOfCombatAI();
 
@@ -935,6 +940,8 @@ void PartyBotAI::UpdateAI(uint32 const diff)
         }
         else if (me->IsMounted())
             me->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+        else if (me->HasAura(783))
+            me->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
     }
     
 	Player* pWarlock = GetWarlock();
