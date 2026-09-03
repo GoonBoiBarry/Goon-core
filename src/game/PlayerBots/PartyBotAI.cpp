@@ -1031,8 +1031,7 @@ void PartyBotAI::UpdateInCombatAI()
             if (m_marksToFocus.size() != 0)
             {
                 pVictim = SelectAttackTarget(pLeader);
-                AttackStart(pVictim);
-                return;              
+                AttackStart(pVictim);            
             }
             
             if (pRogue != nullptr)
