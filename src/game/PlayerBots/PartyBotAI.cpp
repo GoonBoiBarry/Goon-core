@@ -900,7 +900,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
         // Mount if leader is mounted and we don't have a target.
         if (pLeader->IsMounted() && !me->GetVictim())
         {
-            if (!me->IsMounted())
+            if (!me->IsMounted() || me->HasAura(783))
             {
                 // Leave shapeshift before mounting.
                 if (me->IsInDisallowedMountForm() &&
