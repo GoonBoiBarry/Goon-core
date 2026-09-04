@@ -388,13 +388,14 @@ Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
         {
             for (auto markId2 : m_marksToIgnore)
             {
+                ObjectGuid targetGuid2 = me->GetGroup()->GetTargetWithIcon(markId2);
                 if (Unit* pPartyAttacker = SelectPartyAttackTarget())
-                    if (pPartyAttacker != GetMarkedTarget(markId2))
+                    if (pPartyAttacker != me->GetMap()->GetUnit(targetGuid2))
                         return pPartyAttacker;
                     else if (!me->GetAttackers().empty())
                             for (const auto pAttacker : me->GetAttackers())
                             {
-                                if (IsValidHostileTarget(pAttacker) && pAttacker != GetMarkedTarget(markId2))
+                                if (IsValidHostileTarget(pAttacker) && pAttacker != me->GetMap()->GetUnit(targetGuid2))
                                 return pAttacker;
                             }
             }
