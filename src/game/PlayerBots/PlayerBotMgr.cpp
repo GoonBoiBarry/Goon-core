@@ -1467,6 +1467,76 @@ bool ChatHandler::HandlePartyBotFocusMarkCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandlePartyBotIgnoreMarkCommand(char* args)
+{
+    std::string mark = args;
+    auto itrMark = raidTargetIcons.find(mark);
+    if (itrMark == raidTargetIcons.end())
+    {
+        SendSysMessage("Unknown target mark. Valid names are: star, circle, diamond, triangle, moon, square, cross, skull");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    Player* pPlayer = GetSession()->GetPlayer();
+    Player* pTarget = GetSelectedPlayer();
+
+    if (pTarget && (pTarget != pPlayer))
+    {
+        if (pTarget->AI())
+        {
+            if (PartyBotAI* pAI = dynamic_cast<PartyBotAI*>(pTarget->AI()))
+            {
+                if (std::find(pAI->m_marksToIgnore.begin(), pAI->m_marksToIgnore.end(), itrMark->second) != pAI->m_marksToIgnore.end())
+                {
+                    PSendSysMessage("%s already have ignore %s.", pTarget->GetName(), args);
+                    return false;
+                }
+
+                PSendSysMessage("%s will ignore %s.", pTarget->GetName(), args);
+                pAI->m_marksToIgnore.push_back(itrMark->second);
+                return true;
+            }
+        }
+        SendSysMessage("Target is not a party bot.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+    {
+        SendSysMessage("You are not in a group.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        if (Player* pMember = itr->getSource())
+        {
+            if (pMember == pPlayer)
+                continue;
+
+            if (pMember->AI())
+            {
+                if (PartyBotAI* pAI = dynamic_cast<PartyBotAI*>(pMember->AI()))
+                {
+                    if (std::find(pAI->m_marksToIgnore.begin(), pAI->m_marksToIgnore.end(), itrMark->second) != pAI->m_marksToIgnore.end())
+                    {
+                        // Already have ignore mark
+                        continue;
+                    }
+                    pAI->m_marksToIgnore.push_back(itrMark->second);
+                }
+            }
+        }
+    }
+
+    PSendSysMessage("All party bots will ignore %s.", args);
+    return true;
+}
+
 bool ChatHandler::HandlePartyBotClearMarksCommand(char* args)
 {
     Player* pPlayer = GetSession()->GetPlayer();
@@ -1481,6 +1551,7 @@ bool ChatHandler::HandlePartyBotClearMarksCommand(char* args)
                 PSendSysMessage("All mark assignments cleared for %s.", pTarget->GetName());
                 pAI->m_marksToCC.clear();
                 pAI->m_marksToFocus.clear();
+                pAI->m_marksToIgnore.clear();
                 return true;
             }
         }
@@ -1510,6 +1581,7 @@ bool ChatHandler::HandlePartyBotClearMarksCommand(char* args)
                 {
                     pAI->m_marksToCC.clear();
                     pAI->m_marksToFocus.clear();
+                    pAI->m_marksToIgnore.clear();
                 }
             }
         }
