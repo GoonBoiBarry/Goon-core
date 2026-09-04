@@ -386,10 +386,10 @@ Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
 
         if (me->IsInCombat() || pLeader->GetVictim())
         {
-            for (auto markId : m_marksToIgnore)
+            for (auto markId2 : m_marksToIgnore)
             {
                 if (Unit* pPartyAttacker = SelectPartyAttackTarget())
-                    if (pPartyAttacker != GetMarkedTarget(markId))
+                    if (pPartyAttacker != GetMarkedTarget(markId2))
                         return pPartyAttacker;
             }
         }
