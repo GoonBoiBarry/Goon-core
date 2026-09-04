@@ -384,10 +384,20 @@ Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
             }
         }
 
+        if (me->IsInCombat() || pLeader->GetVictim())
+        {
+            for (auto markId : m_marksToIgnore)
+            {
+                if (Unit* pPartyAttacker = SelectPartyAttackTarget())
+                    if (pPartyAttacker != GetMarkedTarget(markId))
+                        return pPartyAttacker;
+            }
+        }
+        
         // Who is the leader attacking.
         if (Unit* pVictim = pLeader->GetVictim())
         {
-            if (IsValidHostileTarget(pVictim))
+            if (IsValidHostileTarget(pVictim) && )
                 return pVictim;
         }
     }
@@ -1035,7 +1045,7 @@ void PartyBotAI::UpdateInCombatAI()
         if (m_role == ROLE_TANK || m_role == ROLE_NO_DISPEL_TANK)
         {
             // Attack marked if exist
-            if (m_marksToFocus.size() != 0)
+            if (m_marksToFocus.size() != 0 || m_marksToIgnore.size() != 0)
             {
                 pVictim = SelectAttackTarget(pLeader);
                 AttackStart(pVictim);            
