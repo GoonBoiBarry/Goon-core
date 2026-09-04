@@ -397,7 +397,7 @@ Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
         // Who is the leader attacking.
         if (Unit* pVictim = pLeader->GetVictim())
         {
-            if (IsValidHostileTarget(pVictim) && )
+            if (IsValidHostileTarget(pVictim))
                 return pVictim;
         }
     }
@@ -405,7 +405,7 @@ Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
     // Who is attacking me.
     for (const auto pAttacker : me->GetAttackers())
     {
-        if (IsValidHostileTarget(pAttacker))
+        if (IsValidHostileTarget(pAttacker) && me->GetRole() != ROLE_HEALER)
             return pAttacker;
     }
 
