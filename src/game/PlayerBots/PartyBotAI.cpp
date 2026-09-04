@@ -384,21 +384,10 @@ Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
             }
         }
 
-        if (me->IsInCombat() || pLeader->GetVictim())
+        if ((me->IsInCombat() || pLeader->GetVictim()) && m_marksToIgnore.size() != 0)
         {
-            for (auto markId2 : m_marksToIgnore)
-            {
-                ObjectGuid targetGuid2 = me->GetGroup()->GetTargetWithIcon(markId2);
                 if (Unit* pPartyAttacker = SelectPartyAttackTarget())
-                    if (pPartyAttacker != me->GetMap()->GetUnit(targetGuid2))
-                        return pPartyAttacker;
-                    else if (!me->GetAttackers().empty())
-                            for (const auto pAttacker : me->GetAttackers())
-                            {
-                                if (IsValidHostileTarget(pAttacker) && pAttacker != me->GetMap()->GetUnit(targetGuid2))
-                                return pAttacker;
-                            }
-            }
+                    return pPartyAttacker;
         }
         
         // Who is the leader attacking.
@@ -449,8 +438,17 @@ Unit* PartyBotAI::SelectPartyAttackTarget() const
             for (const auto pAttacker : pMember->GetAttackers())
             {
                 if (IsValidHostileTarget(pAttacker) &&
-                    me->IsWithinDist(pAttacker, 90.0f))
+                    me->IsWithinDist(pAttacker, 90.0f) && m_marksToIgnore.size() == 0)
                     return pAttacker;
+                else if (m_marksToIgnore.size() != 0)
+                {
+                    for (auto markId2 : m_marksToIgnore)
+                    {
+                        ObjectGuid targetGuid2 = me->GetGroup()->GetTargetWithIcon(markId2);
+                        if (pAttacker != me->GetMap()->GetUnit(targetGuid2))
+                            return pAttacker;                           
+                    }    
+                }
             }
         }
     }
