@@ -391,6 +391,12 @@ Unit* PartyBotAI::SelectAttackTarget(Player* pLeader) const
                 if (Unit* pPartyAttacker = SelectPartyAttackTarget())
                     if (pPartyAttacker != GetMarkedTarget(markId2))
                         return pPartyAttacker;
+                    else if (!me->GetAttackers().empty())
+                            for (const auto pAttacker : me->GetAttackers())
+                            {
+                                if (IsValidHostileTarget(pAttacker) && pAttacker != GetMarkedTarget(markId2))
+                                return pAttacker;
+                            }
             }
         }
         
