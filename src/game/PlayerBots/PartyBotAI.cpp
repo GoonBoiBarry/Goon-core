@@ -1946,7 +1946,7 @@ void PartyBotAI::UpdateInCombatAI_Mage()
                 return;
         }
         
-        if (m_spells.mage.pRemoveLesserCurse)
+        if (m_spells.mage.pRemoveLesserCurse && GetRole() != ROLE_NO_DISPEL_DPS)
         {
             if (Unit* pFriend = SelectDispelTarget(m_spells.mage.pRemoveLesserCurse))
             {
