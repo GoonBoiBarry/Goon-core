@@ -290,6 +290,7 @@ class ChatHandler
         bool HandlePartyBotToggleCastingCommand(bool allowCasting);
         bool HandlePartyBotControlMarkCommand(char * args);
         bool HandlePartyBotFocusMarkCommand(char * args);
+        bool HandlePartyBotIgnoreMarkCommand(char * args);
         bool HandlePartyBotClearMarksCommand(char * args);
         bool HandlePartyBotComeToMeCommand(char * args);
         bool HandlePartyBotUseGObjectCommand(char * args);
