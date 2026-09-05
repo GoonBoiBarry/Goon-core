@@ -30,6 +30,7 @@
 #include "Object.h"
 #include "Player.h"
 #include "SpellCastTargetsInfo.h"
+#include "Packets/Spell.h"
 #include <vector>
 #include <memory>
 
@@ -251,8 +252,8 @@ class Spell
 
         void DoCreateItem(SpellEffectIndex effIdx, uint32 itemtype);
 
-        void WriteSpellGoTargets(WorldPacket* data);
-        void WriteAmmoToPacket(WorldPacket* data);
+        void WriteSpellGoTargets(WorldPackets::Spell::SpellGo& packet);
+        void WriteAmmoToPacket(uint32& ammoDisplayId, uint32& ammoInventoryType);
 
         typedef std::list<Unit*> UnitList;
         void FillTargetMap();
@@ -544,65 +545,9 @@ class Spell
         SpellEntry const* m_triggeredByAuraSpell = nullptr;
     protected:
 
-        struct ExecuteLogInfo
-        {
-            ExecuteLogInfo() {}
-            ExecuteLogInfo(ObjectGuid _targetGuid) : targetGuid(_targetGuid) {}
+        std::vector<WorldPackets::Spell::SpellLogExecute::ExecuteLogInfo> m_executeLogInfo[MAX_EFFECT_INDEX];
 
-            ObjectGuid targetGuid;
-
-            union
-            {
-                struct
-                {
-                    uint32 power;
-                    uint32 amount;
-                    float multiplier;
-                } powerDrain;
-
-                struct
-                {
-                    uint32 count;
-                } extraAttacks;
-
-                struct
-                {
-                    uint32 itemEntry;
-                } createItem;
-
-                struct
-                {
-                    uint32 spellId;
-                } interruptCast;
-
-                struct
-                {
-                    uint32 itemEntry;
-                } feedPet;
-
-                struct
-                {
-                    int32 itemEntry;
-                    int32 unk;
-                } durabilityDamage;
-
-                struct
-                {
-                    uint32 amount;
-                    uint8 critical;
-                } heal;
-
-                struct
-                {
-                    uint32 amount;
-                    uint32 powerType;
-                } energize;
-            };
-        };
-
-        std::vector<ExecuteLogInfo> m_executeLogInfo[MAX_EFFECT_INDEX];
-
-        void AddExecuteLogInfo(SpellEffectIndex i, ExecuteLogInfo info)
+        void AddExecuteLogInfo(SpellEffectIndex i, WorldPackets::Spell::SpellLogExecute::ExecuteLogInfo info)
         {
             m_executeLogInfo[i].push_back(info);
         }
