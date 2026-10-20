@@ -1250,13 +1250,6 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                 return;
         }
         
-        if (m_spells.paladin.pConsecration && !pVictim->HasAura(20924) &&
-            CanTryToCastSpell(me, m_spells.paladin.pConsecration))
-        {
-            if (DoCastSpell(me, m_spells.paladin.pConsecration) == SPELL_CAST_OK)
-                return;
-        }
-        
         if (m_spells.paladin.pTurnEvil &&
             (m_role != ROLE_TANK && m_role != ROLE_NO_DISPEL_TANK))
         {
@@ -1304,6 +1297,12 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
 
         if (Unit* pVictim = me->GetVictim())
         {
+            if (m_spells.paladin.pConsecration && !pVictim->HasAura(20924) &&
+                CanTryToCastSpell(me, m_spells.paladin.pConsecration))
+            {
+                if (DoCastSpell(me, m_spells.paladin.pConsecration) == SPELL_CAST_OK)
+                    return;
+            }
             if (hasSeal && m_spells.paladin.pJudgement &&
                 CanTryToCastSpell(pVictim, m_spells.paladin.pJudgement))
             {
@@ -1323,12 +1322,6 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                 CanTryToCastSpell(pVictim, m_spells.paladin.pHammerOfWrath))
             {
                 if (DoCastSpell(pVictim, m_spells.paladin.pHammerOfWrath) == SPELL_CAST_OK)
-                    return;
-            }
-            if (m_spells.paladin.pConsecration && !pVictim->HasAura(20924) &&
-                CanTryToCastSpell(me, m_spells.paladin.pConsecration))
-            {
-                if (DoCastSpell(me, m_spells.paladin.pConsecration) == SPELL_CAST_OK)
                     return;
             }
             if (m_spells.paladin.pHolyShock &&
