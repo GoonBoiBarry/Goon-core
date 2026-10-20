@@ -1250,7 +1250,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                 return;
         }
         
-        if (m_spells.paladin.pConsecration &&
+        if (m_spells.paladin.pConsecration && !pVictim->HasAura(20924) &&
             CanTryToCastSpell(me, m_spells.paladin.pConsecration))
         {
             if (DoCastSpell(me, m_spells.paladin.pConsecration) == SPELL_CAST_OK)
@@ -1325,7 +1325,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                 if (DoCastSpell(pVictim, m_spells.paladin.pHammerOfWrath) == SPELL_CAST_OK)
                     return;
             }
-            if (m_spells.paladin.pConsecration &&
+            if (m_spells.paladin.pConsecration && !pVictim->HasAura(20924) &&
                 CanTryToCastSpell(me, m_spells.paladin.pConsecration))
             {
                 if (DoCastSpell(me, m_spells.paladin.pConsecration) == SPELL_CAST_OK)
