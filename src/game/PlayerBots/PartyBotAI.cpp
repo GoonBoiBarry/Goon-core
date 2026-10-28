@@ -816,7 +816,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
             me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL, true);
         else if (me->GetClass() == CLASS_HUNTER)
         {
-            if (me->GetCombatDistance(me->GetVictim()) < 8.0f)
+            if (me->GetCombatDistance(me->GetVictim()) < 11.0f)
                 me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL, true);
             else
                 UpdateInCombatAI_Hunter();
@@ -1593,7 +1593,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
     if (Unit* pVictim = me->GetVictim())
     {
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
-            && me->GetDistance(pVictim) > 40.0f && me->HasAura(33393))
+            && me->GetDistance(pVictim) > 50.0f && me->HasAura(33393))
         {
             BeginChasing(pVictim);
         } else if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
@@ -1736,7 +1736,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
         }
 
         if (!me->HasUnitState(UNIT_STATE_ROOT) &&
-            (me->GetCombatDistance(pVictim) < 9.0f) &&
+            (me->GetCombatDistance(pVictim) < 11.0f) &&
             (GetRole() != ROLE_MELEE_DPS) &&
              me->GetMotionMaster()->GetCurrentMovementGeneratorType() != DISTANCING_MOTION_TYPE)
         {
@@ -2353,7 +2353,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
             return;
     }
     else if (Unit* pVictim = me->GetVictim())
-    {
+    {        
         if (m_spells.priest.pShadowform &&
             CanTryToCastSpell(me, m_spells.priest.pShadowform))
         {
