@@ -1288,7 +1288,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
     else
     {
 
-        if (Unit* pVictim = me->GetVictim())
+        if (Unit* pVictim = me->GetVictim() && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (m_spells.paladin.pConsecration && !pVictim->HasAura(20924) &&
                 CanTryToCastSpell(me, m_spells.paladin.pConsecration))
@@ -1998,7 +1998,7 @@ void PartyBotAI::UpdateInCombatAI_Mage()
         }
 
         if (m_spells.mage.pFrostbolt &&
-            CanTryToCastSpell(pVictim, m_spells.mage.pFrostbolt))
+            CanTryToCastSpell(pVictim, m_spells.mage.pFrostbolt) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.mage.pFrostbolt) == SPELL_CAST_OK)
                 return;
@@ -2352,7 +2352,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (GetRole() == ROLE_HEALER && FindAndPreHealTarget())
             return;
     }
-    else if (Unit* pVictim = me->GetVictim())
+    else if (Unit* pVictim = me->GetVictim() && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
     {
         if (m_spells.priest.pShadowform &&
             CanTryToCastSpell(me, m_spells.priest.pShadowform))
@@ -2523,7 +2523,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Warlock()
 
 void PartyBotAI::UpdateInCombatAI_Warlock()
 {
-    if (Unit* pVictim = me->GetVictim())
+    if (Unit* pVictim = me->GetVictim() && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
     {
         if (m_spells.warlock.pDeathCoil &&
            pVictim->CanReachWithMeleeAutoAttack(me) && (me->GetHealthPercent() < 60.0f) &&
