@@ -1288,7 +1288,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
     else
     {
 
-        if (Unit* pVictim = me->GetVictim() && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
+        if (Unit* pVictim = me->GetVictim())
         {
             if (m_spells.paladin.pConsecration && !pVictim->HasAura(20924) &&
                 CanTryToCastSpell(me, m_spells.paladin.pConsecration))
@@ -1304,7 +1304,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
                 me->CastSpell(me, m_spells.paladin.pSeal, false);
             }
             if (hasSeal && m_spells.paladin.pJudgement &&
-                CanTryToCastSpell(pVictim, m_spells.paladin.pJudgement))
+                CanTryToCastSpell(pVictim, m_spells.paladin.pJudgement) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
             {
                 if (DoCastSpell(pVictim, m_spells.paladin.pJudgement) == SPELL_CAST_OK)
                     return;
@@ -2352,7 +2352,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (GetRole() == ROLE_HEALER && FindAndPreHealTarget())
             return;
     }
-    else if (Unit* pVictim = me->GetVictim() && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
+    else if (Unit* pVictim = me->GetVictim())
     {
         if (m_spells.priest.pShadowform &&
             CanTryToCastSpell(me, m_spells.priest.pShadowform))
@@ -2362,7 +2362,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         }
 
         if (m_spells.priest.pMindFlay && me->HasAura(m_spells.priest.pInnerFocus->Id) && me->HasAura(33393) &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pMindFlay))
+            CanTryToCastSpell(pVictim, m_spells.priest.pMindFlay) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.priest.pMindFlay) == SPELL_CAST_OK)
                 return;
@@ -2370,14 +2370,14 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         
         if (m_spells.priest.pSilence &&
             pVictim->IsNonMeleeSpellCasted() &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pSilence))
+            CanTryToCastSpell(pVictim, m_spells.priest.pSilence) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.priest.pSilence) == SPELL_CAST_OK)
                 return;
         }
 
         if (m_spells.priest.pShadowWordPain &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pShadowWordPain))
+            CanTryToCastSpell(pVictim, m_spells.priest.pShadowWordPain) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
 			if ((pVictim->GetHealth() > me->GetMaxHealth() / 2))
 			{
@@ -2387,7 +2387,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         }
 
         if (m_spells.priest.pVampiricEmbrace &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pVampiricEmbrace))
+            CanTryToCastSpell(pVictim, m_spells.priest.pVampiricEmbrace) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
 			if ((pVictim->GetHealth() > me->GetMaxHealth()))
 			{
@@ -2397,14 +2397,14 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         }
 
         if (m_spells.priest.pMindBlast &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pMindBlast))
+            CanTryToCastSpell(pVictim, m_spells.priest.pMindBlast) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.priest.pMindBlast) == SPELL_CAST_OK)
                 return;
         }
 
         if (m_spells.priest.pDevouringPlague &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pDevouringPlague))
+            CanTryToCastSpell(pVictim, m_spells.priest.pDevouringPlague) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
 			if ((pVictim->GetHealth() > me->GetMaxHealth()))
 			{
@@ -2423,14 +2423,14 @@ void PartyBotAI::UpdateInCombatAI_Priest()
 
         if (m_spells.priest.pManaBurn &&
            (pVictim->GetPowerType() == POWER_MANA) &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pManaBurn))
+            CanTryToCastSpell(pVictim, m_spells.priest.pManaBurn) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.priest.pManaBurn) == SPELL_CAST_OK)
                 return;
         }
 
         if (m_spells.priest.pMindFlay &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pMindFlay))
+            CanTryToCastSpell(pVictim, m_spells.priest.pMindFlay) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.priest.pMindFlay) == SPELL_CAST_OK)
                 return;
@@ -2453,7 +2453,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
             }
 
             if (m_spells.priest.pSmite &&
-                CanTryToCastSpell(pVictim, m_spells.priest.pSmite))
+                CanTryToCastSpell(pVictim, m_spells.priest.pSmite) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
             {
                 if (DoCastSpell(pVictim, m_spells.priest.pSmite) == SPELL_CAST_OK)
                     return;
@@ -2523,11 +2523,11 @@ void PartyBotAI::UpdateOutOfCombatAI_Warlock()
 
 void PartyBotAI::UpdateInCombatAI_Warlock()
 {
-    if (Unit* pVictim = me->GetVictim() && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
+    if (Unit* pVictim = me->GetVictim())
     {
         if (m_spells.warlock.pDeathCoil &&
            pVictim->CanReachWithMeleeAutoAttack(me) && (me->GetHealthPercent() < 60.0f) &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pDeathCoil))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pDeathCoil) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pDeathCoil) == SPELL_CAST_OK)
                 return;
@@ -2535,7 +2535,7 @@ void PartyBotAI::UpdateInCombatAI_Warlock()
 
         if (m_spells.warlock.pShadowburn &&
            (pVictim->GetHealthPercent() < 10.0f) &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pShadowburn))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pShadowburn) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pShadowburn) == SPELL_CAST_OK)
                 return;
@@ -2543,7 +2543,7 @@ void PartyBotAI::UpdateInCombatAI_Warlock()
 
         if (m_spells.warlock.pSearingPain &&
            (pVictim->GetHealthPercent() < 20.0f) &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pSearingPain))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pSearingPain) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pSearingPain) == SPELL_CAST_OK)
                 return;
@@ -2583,21 +2583,21 @@ void PartyBotAI::UpdateInCombatAI_Warlock()
         }
 
         if (m_spells.warlock.pImmolate &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pImmolate))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pImmolate) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pImmolate) == SPELL_CAST_OK)
                 return;
         }
 
         if (m_spells.warlock.pConflagrate &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pConflagrate))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pConflagrate) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pConflagrate) == SPELL_CAST_OK)
                 return;
         }
 
         if (m_spells.warlock.pCorruption &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pCorruption))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pCorruption) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
 			if ((pVictim->GetHealth() > me->GetMaxHealth() / 5))
 			{
@@ -2608,7 +2608,7 @@ void PartyBotAI::UpdateInCombatAI_Warlock()
 
         if (m_spells.warlock.pSiphonLife &&
            (me->GetHealthPercent() < 80.0f) &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pSiphonLife))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pSiphonLife) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pSiphonLife) == SPELL_CAST_OK)
                 return;
@@ -2616,7 +2616,7 @@ void PartyBotAI::UpdateInCombatAI_Warlock()
 
         if (m_spells.warlock.pDrainLife &&
            (me->GetHealthPercent() < 30.0f) &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pDrainLife))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pDrainLife) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pDrainLife) == SPELL_CAST_OK)
                 return;
@@ -2624,21 +2624,21 @@ void PartyBotAI::UpdateInCombatAI_Warlock()
 
         if (m_spells.warlock.pFear && (me->GetHealthPercent() < 60.0f) &&
             pVictim->GetVictim() == me &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pFear))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pFear) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pFear) == SPELL_CAST_OK)
                 return;
         }
 
         if (m_spells.warlock.pCurseofShadow &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pCurseofShadow) && pVictim->GetHealth() > me->GetMaxHealth() * 2)
+            CanTryToCastSpell(pVictim, m_spells.warlock.pCurseofShadow) && pVictim->GetHealth() > me->GetMaxHealth() * 2 && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pCurseofShadow) == SPELL_CAST_OK)
                 return;
         }
 
         if (m_spells.warlock.pCurseofAgony &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pCurseofAgony))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pCurseofAgony) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pCurseofAgony) == SPELL_CAST_OK)
                 return;
@@ -2659,7 +2659,7 @@ void PartyBotAI::UpdateInCombatAI_Warlock()
         }
 
         if (m_spells.warlock.pShadowBolt &&
-            CanTryToCastSpell(pVictim, m_spells.warlock.pShadowBolt))
+            CanTryToCastSpell(pVictim, m_spells.warlock.pShadowBolt) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.warlock.pShadowBolt) == SPELL_CAST_OK)
                 return;
