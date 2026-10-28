@@ -816,7 +816,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
             me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL, true);
         else if (me->GetClass() == CLASS_HUNTER)
         {
-            if (me->GetCombatDistance(me->GetVictim()) < 11.0f)
+            if (me->GetCombatDistance(me->GetVictim()) < 20.0f)
                 me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL, true);
             else
                 UpdateInCombatAI_Hunter();
@@ -1612,7 +1612,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
 
         if (me->HasSpell(PB_SPELL_AUTO_SHOT) &&
             !me->IsMoving() &&
-            (me->GetCombatDistance(pVictim) > 11.0f) &&
+            (me->GetCombatDistance(pVictim) > 20.0f) &&
             !me->IsNonMeleeSpellCasted())
         {
             switch (me->CastSpell(pVictim, PB_SPELL_AUTO_SHOT, false))
@@ -1736,7 +1736,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
         }
 
         if (!me->HasUnitState(UNIT_STATE_ROOT) &&
-            (me->GetCombatDistance(pVictim) < 11.0f) &&
+            (me->GetCombatDistance(pVictim) < 20.0f) &&
             (GetRole() != ROLE_MELEE_DPS) &&
              me->GetMotionMaster()->GetCurrentMovementGeneratorType() != DISTANCING_MOTION_TYPE)
         {
