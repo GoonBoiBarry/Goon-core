@@ -2012,7 +2012,7 @@ void PartyBotAI::UpdateInCombatAI_Mage()
         }
 
         if (m_spells.mage.pFireball &&
-            CanTryToCastSpell(pVictim, m_spells.mage.pFireball))
+            CanTryToCastSpell(pVictim, m_spells.mage.pFireball) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
             if (DoCastSpell(pVictim, m_spells.mage.pFireball) == SPELL_CAST_OK)
                 return;
