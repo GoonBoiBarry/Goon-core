@@ -816,7 +816,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
             me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL, true);
         else if (me->GetClass() == CLASS_HUNTER)
         {
-            if (me->GetCombatDistance(me->GetVictim()) < 20.0f)
+            if (me->GetCombatDistance(me->GetVictim()) < 14.0f)
                 me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL, true);
             else
                 UpdateInCombatAI_Hunter();
@@ -1603,7 +1603,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
         }
 
         if (m_spells.hunter.pVolley &&
-           (me->GetEnemyCountInRadiusAround(pVictim, 10.0f) > 2) &&
+           (me->GetEnemyCountInRadiusAround(pVictim, 10.0f) > 4) &&
             CanTryToCastSpell(pVictim, m_spells.hunter.pVolley))
         {
             if (DoCastSpell(pVictim, m_spells.hunter.pVolley) == SPELL_CAST_OK)
@@ -1612,7 +1612,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
 
         if (me->HasSpell(PB_SPELL_AUTO_SHOT) &&
             !me->IsMoving() &&
-            (me->GetCombatDistance(pVictim) > 20.0f) &&
+            (me->GetCombatDistance(pVictim) > 15.0f) &&
             !me->IsNonMeleeSpellCasted())
         {
             switch (me->CastSpell(pVictim, PB_SPELL_AUTO_SHOT, false))
@@ -1672,7 +1672,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
                 return;
         }
 
-        if (GetAttackersInRangeCount(8.0f))
+        if (GetAttackersInRangeCount(30.0f))
         {
             Unit* pAttacker = *me->GetAttackers().begin();
 
@@ -1736,7 +1736,7 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
         }
 
         if (!me->HasUnitState(UNIT_STATE_ROOT) &&
-            (me->GetCombatDistance(pVictim) < 20.0f) &&
+            (me->GetCombatDistance(pVictim) < 15.0f) &&
             (GetRole() != ROLE_MELEE_DPS) &&
              me->GetMotionMaster()->GetCurrentMovementGeneratorType() != DISTANCING_MOTION_TYPE)
         {
@@ -1952,7 +1952,7 @@ void PartyBotAI::UpdateInCombatAI_Mage()
         }
         
         if (m_spells.mage.pBlizzard &&
-           (me->GetEnemyCountInRadiusAround(pVictim, 10.0f) > 2) &&
+           (me->GetEnemyCountInRadiusAround(pVictim, 10.0f) > 3) &&
             CanTryToCastSpell(pVictim, m_spells.mage.pBlizzard))
         {
             if (DoCastSpell(pVictim, m_spells.mage.pBlizzard) == SPELL_CAST_OK)
