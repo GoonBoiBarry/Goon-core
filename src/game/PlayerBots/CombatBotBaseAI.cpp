@@ -3093,7 +3093,7 @@ void CombatBotBaseAI::BeginChasing(Unit* pVictim) const
 		if (me->GetClass() == CLASS_PRIEST)
 			me->SetCasterChaseDistance(26.0f);
 		else if (me->GetClass() == CLASS_HUNTER)
-			me->SetCasterChaseDistance(40.0f);
+			me->SetCasterChaseDistance(50.0f);
         else
             me->SetCasterChaseDistance(30.0f);
 	}
