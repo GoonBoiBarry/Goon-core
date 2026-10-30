@@ -1769,7 +1769,7 @@ void CombatBotBaseAI::PopulateSpellData()
                 earthTotems.push_back(pEarthbindTotem);
             if (pStoneclawtotem)
                 earthTotems.push_back(pStoneclawtotem);
-            if (pStoneskinTotem)
+            if (pStoneskinTotem && m_role != ROLE_TREMOR_TOTEM_HEALS)
                 earthTotems.push_back(pStoneskinTotem);
             if (pStrengthOfEarthTotem)
                 earthTotems.push_back(pStrengthOfEarthTotem);
