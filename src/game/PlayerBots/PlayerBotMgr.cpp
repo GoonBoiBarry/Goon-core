@@ -1077,6 +1077,8 @@ bool ChatHandler::HandlePartyBotSetRoleCommand(char* args)
 		role = ROLE_NO_TOTEMS;
     else if (roleStr == "nodispeltank")
 		role = ROLE_NO_DISPEL_TANK;
+    else if (roleStr == "tremortotem")
+		role = ROLE_TREMOR_TOTEM_HEALS;
 
     if (role == ROLE_INVALID)
         return false;
