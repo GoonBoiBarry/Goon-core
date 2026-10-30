@@ -2370,7 +2370,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         
         if (m_spells.priest.pSilence &&
             pVictim->IsNonMeleeSpellCasted() &&
-            CanTryToCastSpell(pVictim, m_spells.priest.pSilence) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
+            CanTryToCastSpell(pVictim, m_spells.priest.pSilence) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS) && pVictim->GetPowerType() == POWER_MANA)
         {
             if (DoCastSpell(pVictim, m_spells.priest.pSilence) == SPELL_CAST_OK)
                 return;
