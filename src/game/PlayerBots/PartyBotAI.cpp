@@ -943,8 +943,8 @@ void PartyBotAI::UpdateAI(uint32 const diff)
 						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_MAGE_MOUNT), true);
 					if (me->GetClass() == CLASS_WARLOCK)
 						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_WARLOCK_MOUNT), true);
-					if (me->GetClass() == CLASS_SHAMAN)
-						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_SHAMAN_MOUNT), true);
+					if (me->GetClass() == CLASS_)
+						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT__MOUNT), true);
 					if (me->GetClass() == CLASS_PRIEST)
 						me->CastSpell(me, sWorld.getConfig(CONFIG_UINT32_PARTY_BOT_PRIEST_MOUNT), true);
 					if (me->GetClass() == CLASS_DRUID)
@@ -964,9 +964,9 @@ void PartyBotAI::UpdateAI(uint32 const diff)
     {
         if (!pVictim)
         {
-            if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE && me->GetClass() != CLASS_SHAMAN)
+            if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE && me->GetClass() != CLASS_)
 				me->GetMotionMaster()->MoveFollow(pLeader, urand(PB_MIN_FOLLOW_DIST, PB_MAX_FOLLOW_DIST), frand(PB_MIN_FOLLOW_ANGLE, PB_MAX_FOLLOW_ANGLE));
-				else if (me->GetClass() == CLASS_SHAMAN && pWarlock != nullptr)
+				else if (me->GetClass() == CLASS_ && pWarlock != nullptr)
 					me->GetMotionMaster()->MoveFollow(pWarlock, urand(PB_MIN_FOLLOW_DIST, PB_MAX_FOLLOW_DIST), frand(PB_MIN_FOLLOW_ANGLE, PB_MAX_FOLLOW_ANGLE));
 				else
 					me->GetMotionMaster()->MoveFollow(pLeader, urand(PB_MIN_FOLLOW_DIST, PB_MAX_FOLLOW_DIST), frand(PB_MIN_FOLLOW_ANGLE, PB_MAX_FOLLOW_ANGLE));
@@ -1013,8 +1013,8 @@ void PartyBotAI::UpdateOutOfCombatAI()
         case CLASS_PALADIN:
             UpdateOutOfCombatAI_Paladin();
             break;
-        case CLASS_SHAMAN:
-            UpdateOutOfCombatAI_Shaman();
+        case CLASS_:
+            UpdateOutOfCombatAI_();
             break;
         case CLASS_HUNTER:
             UpdateOutOfCombatAI_Hunter();
@@ -1123,8 +1123,8 @@ void PartyBotAI::UpdateInCombatAI()
         case CLASS_PALADIN:
             UpdateInCombatAI_Paladin();
             break;
-        case CLASS_SHAMAN:
-            UpdateInCombatAI_Shaman();
+        case CLASS_:
+            UpdateInCombatAI_();
             break;
         case CLASS_HUNTER:
             UpdateInCombatAI_Hunter();
@@ -1369,43 +1369,43 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
     }
 }
 
-void PartyBotAI::UpdateOutOfCombatAI_Shaman()
+void PartyBotAI::UpdateOutOfCombatAI_()
 {
-    if (m_spells.shaman.pCureDisease)
+    if (m_spells..pCureDisease)
     {
-        if (Unit* pFriend = SelectDispelTarget(m_spells.shaman.pCureDisease))
+        if (Unit* pFriend = SelectDispelTarget(m_spells..pCureDisease))
         {
-            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCureDisease))
+            if (CanTryToCastSpell(pFriend, m_spells..pCureDisease))
             {
-                if (DoCastSpell(pFriend, m_spells.shaman.pCureDisease) == SPELL_CAST_OK)
+                if (DoCastSpell(pFriend, m_spells..pCureDisease) == SPELL_CAST_OK)
                     return;
             }
         }
     }
 	
-    if (m_spells.shaman.pCurePoison)
+    if (m_spells..pCurePoison)
     {
-        if (Unit* pFriend = SelectDispelTarget(m_spells.shaman.pCurePoison))
+        if (Unit* pFriend = SelectDispelTarget(m_spells..pCurePoison))
         {
-            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCurePoison) && !pFriend->HasAura(24321))
+            if (CanTryToCastSpell(pFriend, m_spells..pCurePoison) && !pFriend->HasAura(24321))
             {
-                if (DoCastSpell(pFriend, m_spells.shaman.pCurePoison) == SPELL_CAST_OK)
+                if (DoCastSpell(pFriend, m_spells..pCurePoison) == SPELL_CAST_OK)
                     return;
             }
         }
     }
     
-    if (m_spells.shaman.pWeaponBuff &&
-        CanTryToCastSpell(me, m_spells.shaman.pWeaponBuff))
+    if (m_spells..pWeaponBuff &&
+        CanTryToCastSpell(me, m_spells..pWeaponBuff))
     {
-        if (CastWeaponBuff(m_spells.shaman.pWeaponBuff, EQUIPMENT_SLOT_MAINHAND) == SPELL_CAST_OK)
+        if (CastWeaponBuff(m_spells..pWeaponBuff, EQUIPMENT_SLOT_MAINHAND) == SPELL_CAST_OK)
             return;
     }
 
-    if (m_spells.shaman.pLightningShield &&
-        CanTryToCastSpell(me, m_spells.shaman.pLightningShield))
+    if (m_spells..pLightningShield &&
+        CanTryToCastSpell(me, m_spells..pLightningShield))
     {
-        if (DoCastSpell(me, m_spells.shaman.pLightningShield) == SPELL_CAST_OK)
+        if (DoCastSpell(me, m_spells..pLightningShield) == SPELL_CAST_OK)
             return;
     }
 
@@ -1416,15 +1416,15 @@ void PartyBotAI::UpdateOutOfCombatAI_Shaman()
     if (me->GetVictim())
     {
 		if (GetRole() != ROLE_NO_TOTEMS) {
-			if (SummonShamanTotems())
+			if (SummonTotems())
 				return;
 		}
 
-        UpdateInCombatAI_Shaman();
+        UpdateInCombatAI_();
     }
 }
 
-void PartyBotAI::UpdateInCombatAI_Shaman()
+void PartyBotAI::UpdateInCombatAI_()
 {
     if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS))
     {
@@ -1432,111 +1432,111 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
             return;
 	}
     
-    if (m_spells.shaman.pManaTideTotem &&
+    if (m_spells..pManaTideTotem &&
        (me->GetPowerPercent(POWER_MANA) < 45.0f) &&
-        CanTryToCastSpell(me, m_spells.shaman.pManaTideTotem) && GetRole() != ROLE_NO_TOTEMS)
+        CanTryToCastSpell(me, m_spells..pManaTideTotem) && GetRole() != ROLE_NO_TOTEMS)
     {
-        if (DoCastSpell(me, m_spells.shaman.pManaTideTotem) == SPELL_CAST_OK)
+        if (DoCastSpell(me, m_spells..pManaTideTotem) == SPELL_CAST_OK)
             return;
     }
 
-    if (GetRole() != ROLE_HEALER && GetRole() != ROLE_NO_TOTEMS)
+    if (GetRole() != ROLE_HEALER && GetRole() != ROLE_NO_TOTEMS && GetRole() != ROLE_TREMOR_TOTEM_HEALS)
     {
         if (Unit* pVictim = me->GetVictim())
         {
-            if (m_spells.shaman.pElementalMastery &&
+            if (m_spells..pElementalMastery &&
                 me->GetAttackers().empty() &&
-                CanTryToCastSpell(me, m_spells.shaman.pElementalMastery))
+                CanTryToCastSpell(me, m_spells..pElementalMastery))
             {
-                if (DoCastSpell(me, m_spells.shaman.pElementalMastery) == SPELL_CAST_OK)
+                if (DoCastSpell(me, m_spells..pElementalMastery) == SPELL_CAST_OK)
                     return;
             }
 
-            if (m_spells.shaman.pEarthShock &&
+            if (m_spells..pEarthShock &&
                 pVictim->IsNonMeleeSpellCasted(false, false, true) &&
-                CanTryToCastSpell(pVictim, m_spells.shaman.pEarthShock))
+                CanTryToCastSpell(pVictim, m_spells..pEarthShock))
             {
-                if (DoCastSpell(pVictim, m_spells.shaman.pEarthShock) == SPELL_CAST_OK)
+                if (DoCastSpell(pVictim, m_spells..pEarthShock) == SPELL_CAST_OK)
                     return;
             }
 
-            if (m_spells.shaman.pFrostShock &&
+            if (m_spells..pFrostShock &&
                 pVictim->IsMoving() &&
-                CanTryToCastSpell(pVictim, m_spells.shaman.pFrostShock))
+                CanTryToCastSpell(pVictim, m_spells..pFrostShock))
             {
-                if (DoCastSpell(pVictim, m_spells.shaman.pFrostShock) == SPELL_CAST_OK)
+                if (DoCastSpell(pVictim, m_spells..pFrostShock) == SPELL_CAST_OK)
                     return;
             }
 
-            if (m_spells.shaman.pStormstrike &&
-                CanTryToCastSpell(pVictim, m_spells.shaman.pStormstrike))
+            if (m_spells..pStormstrike &&
+                CanTryToCastSpell(pVictim, m_spells..pStormstrike))
             {
-                if (DoCastSpell(pVictim, m_spells.shaman.pStormstrike) == SPELL_CAST_OK)
+                if (DoCastSpell(pVictim, m_spells..pStormstrike) == SPELL_CAST_OK)
                     return;
             }
 
-            if (m_spells.shaman.pChainLightning &&
-                CanTryToCastSpell(pVictim, m_spells.shaman.pChainLightning))
+            if (m_spells..pChainLightning &&
+                CanTryToCastSpell(pVictim, m_spells..pChainLightning))
             {
-                if (DoCastSpell(pVictim, m_spells.shaman.pChainLightning) == SPELL_CAST_OK)
+                if (DoCastSpell(pVictim, m_spells..pChainLightning) == SPELL_CAST_OK)
                     return;
             }
 
-            if (m_spells.shaman.pPurge &&
-                IsValidDispelTarget(pVictim, m_spells.shaman.pPurge) &&
-                CanTryToCastSpell(pVictim, m_spells.shaman.pPurge))
+            if (m_spells..pPurge &&
+                IsValidDispelTarget(pVictim, m_spells..pPurge) &&
+                CanTryToCastSpell(pVictim, m_spells..pPurge))
             {
-                if (DoCastSpell(pVictim, m_spells.shaman.pPurge) == SPELL_CAST_OK)
+                if (DoCastSpell(pVictim, m_spells..pPurge) == SPELL_CAST_OK)
                     return;
             }
 
-            if (m_spells.shaman.pFlameShock &&
-                CanTryToCastSpell(pVictim, m_spells.shaman.pFlameShock))
+            if (m_spells..pFlameShock &&
+                CanTryToCastSpell(pVictim, m_spells..pFlameShock))
             {
-                if (DoCastSpell(pVictim, m_spells.shaman.pFlameShock) == SPELL_CAST_OK)
+                if (DoCastSpell(pVictim, m_spells..pFlameShock) == SPELL_CAST_OK)
                     return;
             }
 
-            if (m_spells.shaman.pLightningBolt &&
+            if (m_spells..pLightningBolt &&
                (GetRole() == ROLE_RANGE_DPS || !me->CanReachWithMeleeAutoAttack(pVictim)) &&
-                CanTryToCastSpell(pVictim, m_spells.shaman.pLightningBolt))
+                CanTryToCastSpell(pVictim, m_spells..pLightningBolt))
             {
-                if (DoCastSpell(pVictim, m_spells.shaman.pLightningBolt) == SPELL_CAST_OK)
+                if (DoCastSpell(pVictim, m_spells..pLightningBolt) == SPELL_CAST_OK)
                     return;
             }
         }
     }
 
 	if (GetRole() != ROLE_NO_TOTEMS) {
-		if (SummonShamanTotems())
+		if (SummonTotems())
 			return;
 	}
 
-    if (m_spells.shaman.pCureDisease)
+    if (m_spells..pCureDisease)
     {
-        if (Unit* pFriend = SelectDispelTarget(m_spells.shaman.pCureDisease))
+        if (Unit* pFriend = SelectDispelTarget(m_spells..pCureDisease))
         {
-            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCureDisease))
+            if (CanTryToCastSpell(pFriend, m_spells..pCureDisease))
             {
-                if (DoCastSpell(pFriend, m_spells.shaman.pCureDisease) == SPELL_CAST_OK)
+                if (DoCastSpell(pFriend, m_spells..pCureDisease) == SPELL_CAST_OK)
                     return;
             }
         }
     }
 
-    if (m_spells.shaman.pCurePoison)
+    if (m_spells..pCurePoison)
     {
-        if (Unit* pFriend = SelectDispelTarget(m_spells.shaman.pCurePoison))
+        if (Unit* pFriend = SelectDispelTarget(m_spells..pCurePoison))
         {
-            if (CanTryToCastSpell(pFriend, m_spells.shaman.pCurePoison) && !pFriend->HasAura(24321))
+            if (CanTryToCastSpell(pFriend, m_spells..pCurePoison) && !pFriend->HasAura(24321))
             {
-                if (DoCastSpell(pFriend, m_spells.shaman.pCurePoison) == SPELL_CAST_OK)
+                if (DoCastSpell(pFriend, m_spells..pCurePoison) == SPELL_CAST_OK)
                     return;
             }
         }
     }
 
-    if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS))
+    if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS || GetRole() == ROLE_TREMOR_TOTEM_HEALS))
     {
         if (FindAndHealInjuredAlly(70.0f, 85.0f))
             return;
