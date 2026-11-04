@@ -1054,10 +1054,9 @@ void PartyBotAI::UpdateInCombatAI()
             {
                 pVictim = SelectAttackTarget(pLeader);
                 AttackStart(pVictim);
-                return;
             }
             
-            if (pRogue != nullptr)
+            if (pRogue != nullptr && m_marksToFocus.size() == 0)
             {
             // Defend party members.
                 if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR || pVictim->GetVictim() == pRogue && pRogue->HasAura(33393))
@@ -1069,7 +1068,7 @@ void PartyBotAI::UpdateInCombatAI()
                     }
                 }
             } 
-            else if (!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR) 
+            else if ((!pVictim || pVictim->GetVictim() == me || pVictim->GetVictim() == pLeader && pLeader->GetClass() == CLASS_WARRIOR) && m_marksToFocus.size() == 0) 
             {
                     if (pVictim = SelectPartyAttackTarget())
                     {
