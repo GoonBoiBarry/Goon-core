@@ -897,7 +897,7 @@ void PartyBotAI::UpdateAI(uint32 const diff)
 
     Unit* pVictim = me->GetVictim();
 
-    if (GetRole() != ROLE_HEALER && GetRole() != ROLE_NO_TOTEMS)
+    if (GetRole() != ROLE_HEALER && GetRole() != ROLE_NO_TOTEMS && GetRole() != ROLE_TREMOR_TOTEM_HEALS)
     {
         if (!pVictim || !IsValidHostileTarget(pVictim))
         {
@@ -1409,7 +1409,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Shaman()
             return;
     }
 
-    if ((m_role == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS) &&
+    if ((m_role == ROLE_HEALER || m_role == ROLE_NO_TOTEMS || m_role == ROLE_TREMOR_TOTEM_HEALS) &&
         FindAndHealInjuredAlly(85.0f, 85.0f) && me->GetPowerPercent(POWER_MANA) > 5.0f)
         return;
 
@@ -1428,12 +1428,12 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
 {
     if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS))
     {
-        if (FindAndHealInjuredAlly(60.0f, 60.0f))
+        if (FindAndHealInjuredAlly(70.0f, 70.0f))
             return;
 	}
     
     if (m_spells.shaman.pManaTideTotem &&
-       (me->GetPowerPercent(POWER_MANA) < 45.0f) &&
+       (me->GetPowerPercent(POWER_MANA) < 55.0f) &&
         CanTryToCastSpell(me, m_spells.shaman.pManaTideTotem) && GetRole() != ROLE_NO_TOTEMS)
     {
         if (DoCastSpell(me, m_spells.shaman.pManaTideTotem) == SPELL_CAST_OK)
@@ -1538,7 +1538,7 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
 
     if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS || GetRole() == ROLE_TREMOR_TOTEM_HEALS))
     {
-        if (FindAndHealInjuredAlly(70.0f, 85.0f))
+        if (FindAndHealInjuredAlly(80.0f, 80.0f))
             return;
 
         if (FindAndPreHealTarget())
@@ -2379,7 +2379,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (m_spells.priest.pShadowWordPain &&
             CanTryToCastSpell(pVictim, m_spells.priest.pShadowWordPain) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
-			if ((pVictim->GetHealth() > me->GetMaxHealth() / 2))
+			if ((pVictim->GetHealth() > me->GetMaxHealth() * 2))
 			{
 				if (DoCastSpell(pVictim, m_spells.priest.pShadowWordPain) == SPELL_CAST_OK)
 					return;
@@ -2389,7 +2389,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (m_spells.priest.pVampiricEmbrace &&
             CanTryToCastSpell(pVictim, m_spells.priest.pVampiricEmbrace) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
-			if ((pVictim->GetHealth() > me->GetMaxHealth()))
+			if ((pVictim->GetHealth() > me->GetMaxHealth() * 2))
 			{
 				if (DoCastSpell(pVictim, m_spells.priest.pVampiricEmbrace) == SPELL_CAST_OK)
 					return;
@@ -2406,7 +2406,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         if (m_spells.priest.pDevouringPlague &&
             CanTryToCastSpell(pVictim, m_spells.priest.pDevouringPlague) && !pVictim->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
         {
-			if ((pVictim->GetHealth() > me->GetMaxHealth()))
+			if ((pVictim->GetHealth() > me->GetMaxHealth() * 2))
 			{
 				if (DoCastSpell(pVictim, m_spells.priest.pDevouringPlague) == SPELL_CAST_OK)
 					return;
@@ -2437,7 +2437,7 @@ void PartyBotAI::UpdateInCombatAI_Priest()
         }
 
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
-            && me->GetDistance(pVictim) > 26.0f)
+            && me->GetDistance(pVictim) > 25.0f)
         {
             BeginChasing(pVictim);
         }
@@ -2460,7 +2460,8 @@ void PartyBotAI::UpdateInCombatAI_Priest()
             }
         }
 
-        if (me->HasSpell(PB_SPELL_SHOOT_WAND) &&
+        if (!me->HasAura(33393) && 
+            me->HasSpell(PB_SPELL_SHOOT_WAND) &&
            !me->IsMoving() &&
            (me->GetPowerPercent(POWER_MANA) < 5.0f) &&
            !me->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL))
