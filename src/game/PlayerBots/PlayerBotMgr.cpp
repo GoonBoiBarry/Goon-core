@@ -1079,6 +1079,8 @@ bool ChatHandler::HandlePartyBotSetRoleCommand(char* args)
 		role = ROLE_NO_DISPEL_TANK;
     else if (roleStr == "tremortotem")
 		role = ROLE_TREMOR_TOTEM_HEALS;
+    else if (roleStr == "longrangedps")
+        role = ROLE_LONG_RANGED_DPS;
 
     if (role == ROLE_INVALID)
         return false;
@@ -1879,7 +1881,7 @@ bool ChatHandler::HandlePartyBotPullCommand(char* args)
             {
                 if (PartyBotAI* pAI = dynamic_cast<PartyBotAI*>(pMember->AI()))
                 {
-                    if (pAI->m_role == ROLE_MELEE_DPS || pAI->m_role == ROLE_RANGE_DPS || pAI->m_role == ROLE_NO_DISPEL_DPS)
+                    if (pAI->m_role == ROLE_MELEE_DPS || pAI->m_role == ROLE_RANGE_DPS || pAI->m_role == ROLE_NO_DISPEL_DPS || pAI->m_role == ROLE_LONG_RANGED_DPS)
                     {
                         HandlePartyBotPauseApplyHelper(pMember, duration);
                         continue;
