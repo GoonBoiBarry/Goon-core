@@ -1103,7 +1103,7 @@ void PartyBotAI::UpdateInCombatAI()
         }
         
         // Swap DPS to marked target or party leader's target
-        if (m_role == ROLE_MELEE_DPS || m_role == ROLE_RANGE_DPS || m_role == ROLE_NO_DISPEL_DPS)
+        if (m_role == ROLE_MELEE_DPS || m_role == ROLE_RANGE_DPS || m_role == ROLE_NO_DISPEL_DPS || m_role == ROLE_LONG_RANGED_DPS)
         {
             Unit* newVictim = SelectAttackTarget(pLeader);
 
@@ -1221,7 +1221,7 @@ void PartyBotAI::UpdateInCombatAI_Paladin()
             return;
     }
 
-    if (Unit* pTarget = SelectHealTarget(20.0f, 30.0f))
+    if (Unit* pTarget = SelectHealTarget(30.0f, 30.0f))
 		if (m_spells.paladin.pLayOnHands &&
             CanTryToCastSpell(pTarget, m_spells.paladin.pLayOnHands))
         {
@@ -1593,11 +1593,11 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
     if (Unit* pVictim = me->GetVictim())
     {
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
-            && me->GetDistance(pVictim) > 50.0f && me->HasAura(33393))
+            && me->GetDistance(pVictim) > 30.0f && (GetRole() != ROLE_LONG_RANGED_DPS))
         {
             BeginChasing(pVictim);
         } else if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
-            && me->GetDistance(pVictim) > 30.0f && !me->HasAura(33393))
+            && me->GetDistance(pVictim) > 50.0f)
         {
             BeginChasing(pVictim);
         }
@@ -1613,6 +1613,21 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
         if (me->HasSpell(PB_SPELL_AUTO_SHOT) &&
             !me->IsMoving() &&
             (me->GetCombatDistance(pVictim) > 15.0f) &&
+            !me->IsNonMeleeSpellCasted() &&
+            (GetRole() != ROLE_LONG_RANGED_DPS))
+        {
+            switch (me->CastSpell(pVictim, PB_SPELL_AUTO_SHOT, false))
+            {
+                case SPELL_FAILED_NEED_AMMO:
+                case SPELL_FAILED_NO_AMMO:
+                {
+                    AddHunterAmmo();
+                    break;
+                }
+            }
+        } else if (me->HasSpell(PB_SPELL_AUTO_SHOT) &&
+            !me->IsMoving() &&
+            (me->GetCombatDistance(pVictim) > 30.0f) &&
             !me->IsNonMeleeSpellCasted())
         {
             switch (me->CastSpell(pVictim, PB_SPELL_AUTO_SHOT, false))
@@ -1737,7 +1752,16 @@ void PartyBotAI::UpdateInCombatAI_Hunter()
 
         if (!me->HasUnitState(UNIT_STATE_ROOT) &&
             (me->GetCombatDistance(pVictim) < 15.0f) &&
-            (GetRole() != ROLE_MELEE_DPS) &&
+            (GetRole() != ROLE_LONG_RANGED_DPS) &&
+             me->GetMotionMaster()->GetCurrentMovementGeneratorType() != DISTANCING_MOTION_TYPE)
+        {
+            if (!me->IsStopped())
+                me->StopMoving();
+            me->GetMotionMaster()->Clear();
+            if (RunAwayFromTarget(pVictim))
+                return;
+        } else if (!me->HasUnitState(UNIT_STATE_ROOT) &&
+            (me->GetCombatDistance(pVictim) < 30.0f) &&
              me->GetMotionMaster()->GetCurrentMovementGeneratorType() != DISTANCING_MOTION_TYPE)
         {
             if (!me->IsStopped())
