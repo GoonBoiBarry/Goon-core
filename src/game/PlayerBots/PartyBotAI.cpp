@@ -1426,7 +1426,7 @@ void PartyBotAI::UpdateOutOfCombatAI_Shaman()
 
 void PartyBotAI::UpdateInCombatAI_Shaman()
 {
-    if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS))
+    if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS || GetRole() == ROLE_TREMOR_TOTEM_HEALS))
     {
         if (FindAndHealInjuredAlly(70.0f, 70.0f))
             return;
@@ -1538,7 +1538,7 @@ void PartyBotAI::UpdateInCombatAI_Shaman()
 
     if (me->GetPowerPercent(POWER_MANA) > 5.0f && (GetRole() == ROLE_HEALER || GetRole() == ROLE_NO_TOTEMS || GetRole() == ROLE_TREMOR_TOTEM_HEALS))
     {
-        if (FindAndHealInjuredAlly(80.0f, 80.0f))
+        if (FindAndHealInjuredAlly(85.0f, 85.0f))
             return;
 
         if (FindAndPreHealTarget())
